@@ -1,78 +1,285 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Logistic Inventory{% endblock %}
+{% block title %}Dashboard — LogiStock{% endblock %}
+{% block page_title %}<i class="bi bi-speedometer2 me-2" style="background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>Dashboard{% endblock %}
 
 {% block content %}
-<h1>📊 Dashboard</h1>
 
-{# ── Summary cards ──────────────────────────────────────────────────────── #}
-<h2>Summary</h2>
-<table border="1" cellpadding="6">
-  <tr>
-    <th>Total Products</th>
-    <th>Total Inventory Value</th>
-    <th>Low-Stock Items</th>
-  </tr>
-  <tr>
-    <td>{{ total_products }}</td>
-    <td>${{ "%.2f" | format(total_value) }}</td>
-    <td>{{ low_stock | length }}</td>
-  </tr>
-</table>
+{# ── STAT CARDS ──────────────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
 
-{# ── Stock by category ───────────────────────────────────────────────────── #}
-<h2>Stock by Category</h2>
-{% if stock_by_category %}
-<table border="1" cellpadding="6">
-  <tr><th>Category</th><th>Total Qty</th><th>Products</th></tr>
-  {% for cat in stock_by_category %}
-  <tr>
-    <td>{{ cat._id }}</td>
-    <td>{{ cat.total_qty }}</td>
-    <td>{{ cat.count }}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>No products yet.</p>
-{% endif %}
+  <div class="col-6 col-xl-3 ani-1">
+    <div class="stat-card stat-card-1">
+      <div class="stat-icon si-1"><i class="bi bi-box-seam"></i></div>
+      <div class="stat-val" data-count="{{ total_products }}">0</div>
+      <div class="stat-lbl">Total Products</div>
+    </div>
+  </div>
 
-{# ── Low-stock alerts ────────────────────────────────────────────────────── #}
-<h2>⚠️ Low-Stock Items (quantity ≤ reorder level)</h2>
-{% if low_stock %}
-<table border="1" cellpadding="6">
-  <tr><th>Name</th><th>SKU</th><th>Category</th><th>Qty</th><th>Reorder Level</th></tr>
-  {% for p in low_stock %}
-  <tr style="background:#ffe8e8;">
-    <td>{{ p.name }}</td>
-    <td>{{ p.sku }}</td>
-    <td>{{ p.category }}</td>
-    <td><strong>{{ p.quantity }}</strong></td>
-    <td>{{ p.reorder_level }}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>✅ All items are above their reorder levels.</p>
-{% endif %}
+  <div class="col-6 col-xl-3 ani-2">
+    <div class="stat-card stat-card-2">
+      <div class="stat-icon si-2"><i class="bi bi-currency-rupee"></i></div>
+      <div class="stat-val" data-count="{{ total_value | round(0) | int }}" data-prefix="₹">₹0</div>
+      <div class="stat-lbl">Inventory Value</div>
+    </div>
+  </div>
 
-{# ── Recent movements ────────────────────────────────────────────────────── #}
-<h2>🔄 Recent Movements (last 5)</h2>
-{% if recent_movements %}
-<table border="1" cellpadding="6">
-  <tr><th>Product</th><th>Type</th><th>Qty</th><th>Date (UTC)</th><th>Note</th></tr>
-  {% for m in recent_movements %}
-  <tr>
-    <td>{{ m.product_name }}</td>
-    <td>{{ m.type }}</td>
-    <td>{{ m.qty }}</td>
-    <td>{{ m.date.strftime('%Y-%m-%d %H:%M') }}</td>
-    <td>{{ m.note or "—" }}</td>
-  </tr>
-  {% endfor %}
-</table>
-<p><a href="{{ url_for('movement_history') }}">View all movements →</a></p>
-{% else %}
-<p>No movements recorded yet.</p>
-{% endif %}
+  <div class="col-6 col-xl-3 ani-3">
+    <div class="stat-card stat-card-3">
+      <div class="stat-icon si-3"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="stat-val" data-count="{{ low_stock | length }}">0</div>
+      <div class="stat-lbl">Low-Stock Alerts</div>
+    </div>
+  </div>
 
+  <div class="col-6 col-xl-3 ani-4">
+    <div class="stat-card stat-card-4">
+      <div class="stat-icon si-4"><i class="bi bi-stack"></i></div>
+      <div class="stat-val" data-count="{{ total_units }}">0</div>
+      <div class="stat-lbl">Total Units in Stock</div>
+    </div>
+  </div>
+
+</div>
+
+{# ── CHARTS ROW ──────────────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+  <!-- Doughnut: Stock by category -->
+  <div class="col-md-5">
+    <div class="glass-card h-100">
+      <div class="card-head">
+        <h6><i class="bi bi-pie-chart"></i> Stock by Category</h6>
+      </div>
+      <div class="card-body d-flex align-items-center justify-content-center" style="min-height:240px;">
+        {% if stock_by_category %}
+        <div style="max-width:260px; width:100%;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        {% else %}
+        <p style="color:var(--text-3);font-size:0.84rem;">No data yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar: Top 5 by quantity -->
+  <div class="col-md-7">
+    <div class="glass-card h-100">
+      <div class="card-head">
+        <h6><i class="bi bi-bar-chart"></i> Top 5 Products by Quantity</h6>
+      </div>
+      <div class="card-body" style="min-height:240px;">
+        {% if top5_by_qty %}
+        <canvas id="top5Chart" style="max-height:220px;"></canvas>
+        {% else %}
+        <p style="color:var(--text-3);font-size:0.84rem;">No data yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{# ── BOTTOM ROW: Low-stock + Recent movements ────────────────────────────── #}
+<div class="row g-3">
+
+  <!-- Low-stock panel -->
+  <div class="col-lg-5">
+    <div class="glass-card h-100">
+      <div class="card-head">
+        <h6><i class="bi bi-exclamation-triangle text-warning"></i> Low-Stock Items</h6>
+        <span style="font-size:0.72rem;color:var(--text-3);">qty ≤ reorder level</span>
+      </div>
+      <div class="card-body">
+        {% if low_stock %}
+          {% for p in low_stock %}
+          <div class="ls-item">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <span style="font-weight:600;font-size:0.86rem;color:var(--text-1);">{{ p.name }}</span>
+                <span class="td-sku ms-2">{{ p.sku }}</span>
+              </div>
+              <span class="badge-qty bq-crit">{{ p.quantity }} / {{ p.reorder_level }}</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-3);margin-bottom:4px;">{{ p.category }} &bull; {{ p.location or '—' }}</div>
+            <div class="ls-bar-track">
+              {# width = qty/reorder_level as %, capped at 100% #}
+              {% set pct = [((p.quantity / p.reorder_level) * 100) | round | int, 100] | min %}
+              <div class="ls-bar-fill" data-pct="{{ pct }}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="empty-state" style="padding:30px 0;">
+          <i class="bi bi-check-circle" style="color:var(--c-success);opacity:0.6;"></i>
+          <h6>All items are healthy!</h6>
+          <p>No products are below their reorder level.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent movements -->
+  <div class="col-lg-7">
+    <div class="glass-card h-100">
+      <div class="card-head">
+        <h6><i class="bi bi-arrow-left-right"></i> Recent Movements</h6>
+        <a href="{{ url_for('movement_history') }}" class="btn-glass" style="font-size:0.75rem;padding:5px 12px;">
+          View all <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_movements %}
+        <table class="g-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Type</th>
+              <th>Qty</th>
+              <th>Date</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in recent_movements %}
+            <tr>
+              <td class="td-name">{{ m.product_name }}</td>
+              <td>
+                {% if m.type == 'IN' %}
+                  <span class="badge-in">▲ IN</span>
+                {% else %}
+                  <span class="badge-out">▼ OUT</span>
+                {% endif %}
+              </td>
+              <td>{{ m.qty }}</td>
+              <td style="white-space:nowrap;font-size:0.78rem;color:var(--text-3);">
+                {{ m.date.strftime('%d %b %Y, %H:%M') }}
+              </td>
+              <td style="color:var(--text-3);font-size:0.8rem;">{{ m.note or '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><i class="bi bi-inbox"></i><h6>No movements yet</h6></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div><!-- /row -->
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+/* ── Count-up animation ─────────────────────────────── */
+function countUp(el, target, prefix) {
+  const dur = 1200;
+  const fps = 60;
+  const steps = dur / (1000 / fps);
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current = Math.min(current + increment, target);
+    el.textContent = (prefix || '') + Math.floor(current).toLocaleString('en-IN');
+    if (current >= target) clearInterval(timer);
+  }, 1000 / fps);
+}
+
+document.querySelectorAll('.stat-val[data-count]').forEach(el => {
+  const target = parseInt(el.dataset.count, 10) || 0;
+  const prefix = el.dataset.prefix || '';
+  countUp(el, target, prefix);
+});
+
+/* ── Animate low-stock progress bars ─────────────────── */
+document.querySelectorAll('.ls-bar-fill[data-pct]').forEach(el => {
+  el.style.width = el.dataset.pct + '%';
+});
+</script>
+
+{# Safely serialize chart data as JSON script blocks to avoid JS linter errors #}
+<script id="catDataJson" type="application/json">
+  {{ stock_by_category | tojson if stock_by_category else '[]' }}
+</script>
+<script id="top5DataJson" type="application/json">
+  {{ top5_by_qty | tojson if top5_by_qty else '[]' }}
+</script>
+
+<script>
+/* ── Chart defaults ─────────────────────────────────── */
+Chart.defaults.color = '#9ca3c8';
+Chart.defaults.font.family = 'Poppins, sans-serif';
+Chart.defaults.font.size = 11;
+
+const COLORS = ['#00d4ff','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4'];
+
+/* ── Doughnut: Stock by category ────────────────────── */
+const catEl = document.getElementById('catDataJson');
+const catData = catEl ? JSON.parse(catEl.textContent.trim() || '[]') : [];
+
+if (catData && catData.length > 0 && document.getElementById('categoryChart')) {
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: catData.map(c => c._id),
+      datasets: [{
+        data: catData.map(c => c.total_qty),
+        backgroundColor: COLORS.slice(0, catData.length),
+        borderColor: 'rgba(255,255,255,0.06)',
+        borderWidth: 2,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 14, boxWidth: 12, usePointStyle: true } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString('en-IN')} units` } }
+      }
+    }
+  });
+}
+
+/* ── Bar: Top 5 products by qty ─────────────────────── */
+const top5El = document.getElementById('top5DataJson');
+const top5 = top5El ? JSON.parse(top5El.textContent.trim() || '[]') : [];
+
+if (top5 && top5.length > 0 && document.getElementById('top5Chart')) {
+  const ctx = document.getElementById('top5Chart').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(0,212,255,0.8)');
+  gradient.addColorStop(1, 'rgba(139,92,246,0.5)');
+
+  new Chart(document.getElementById('top5Chart'), {
+    type: 'bar',
+    data: {
+      labels: top5.map(p => p.name.length > 18 ? p.name.slice(0,17)+'…' : p.name),
+      datasets: [{
+        label: 'Units in stock',
+        data: top5.map(p => p.quantity),
+        backgroundColor: gradient,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        x: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { maxRotation: 20 } },
+        y: { grid: { color:'rgba(255,255,255,0.06)' }, beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString('en-IN')} units` } }
+      }
+    }
+  });
+}
+</script>
 {% endblock %}

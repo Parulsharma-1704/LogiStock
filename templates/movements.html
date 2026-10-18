@@ -1,43 +1,93 @@
 {% extends "base.html" %}
-{% block title %}Movement History — Logistic Inventory{% endblock %}
+{% block title %}Movement History — LogiStock{% endblock %}
+{% block page_title %}<i class="bi bi-arrow-left-right me-2" style="background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>Movement History{% endblock %}
 
 {% block content %}
-<h1>📋 Movement History</h1>
 
-{% if movements %}
-<p>Showing {{ movements | length }} movement(s), newest first.</p>
-<table border="1" cellpadding="6" style="width:100%;border-collapse:collapse;">
-  <tr>
-    <th>#</th>
-    <th>Product</th>
-    <th>Type</th>
-    <th>Qty</th>
-    <th>Date (UTC)</th>
-    <th>Note</th>
-  </tr>
-  {% for m in movements %}
-  <tr {% if m.type == "OUT" %}style="background:#fff0f0;"
-      {% elif m.type == "IN" %}style="background:#f0fff0;"
-      {% endif %}>
-    <td>{{ loop.index }}</td>
-    <td>{{ m.product_name }}</td>
-    <td>
-      {% if m.type == "IN" %}
-        <span style="color:green;font-weight:bold;">▲ IN</span>
-      {% else %}
-        <span style="color:red;font-weight:bold;">▼ OUT</span>
-      {% endif %}
-    </td>
-    <td>{{ m.qty }}</td>
-    <td>{{ m.date.strftime('%Y-%m-%d %H:%M') }}</td>
-    <td>{{ m.note or "—" }}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>No movements recorded yet.</p>
-<p>Use the <strong>▲ IN</strong> / <strong>▼ OUT</strong> buttons on the
-   <a href="{{ url_for('product_list') }}">Products page</a> to log movements.</p>
-{% endif %}
+<div class="glass-card">
+  <div class="card-head">
+    <h6>
+      <i class="bi bi-clock-history"></i> All Movements
+      <span style="font-weight:400;color:var(--text-3);font-size:0.75rem;text-transform:none;letter-spacing:0;">
+        — {{ movements | length }} record{{ 's' if movements | length != 1 }}
+      </span>
+    </h6>
+    <div class="d-flex gap-2">
+      <span class="badge-in" style="font-size:0.7rem;">▲ IN</span>
+      <span class="badge-out" style="font-size:0.7rem;">▼ OUT</span>
+    </div>
+  </div>
+
+  {% if movements %}
+  <div style="overflow-x:auto;">
+    <table class="g-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>Type</th>
+          <th>Qty</th>
+          <th>Date &amp; Time</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in movements %}
+        <tr class="movement-row">
+          <td data-label="#">
+            <span style="color:var(--text-3);font-size:0.78rem;">{{ loop.index }}</span>
+          </td>
+          <td data-label="Product">
+            <span class="td-name">{{ m.product_name }}</span>
+          </td>
+          <td data-label="Type">
+            {% if m.type == 'IN' %}
+              <span class="badge-in">▲ IN</span>
+            {% else %}
+              <span class="badge-out">▼ OUT</span>
+            {% endif %}
+          </td>
+          <td data-label="Qty">
+            <span style="font-weight:700;
+              color:{% if m.type == 'IN' %}var(--c-success){% else %}var(--c-danger){% endif %};">
+              {% if m.type == 'IN' %}+{% else %}−{% endif %}{{ m.qty }}
+            </span>
+          </td>
+          <td data-label="Date">
+            <span style="white-space:nowrap;font-size:0.8rem;color:var(--text-2);">
+              {{ m.date.strftime('%d %b %Y') }}
+            </span>
+            <br>
+            <span style="font-size:0.72rem;color:var(--text-3);">
+              {{ m.date.strftime('%H:%M UTC') }}
+            </span>
+          </td>
+          <td data-label="Note">
+            <span style="font-size:0.82rem;color:var(--text-3);">
+              {% if m.note %}
+                <i class="bi bi-chat-left-text me-1" style="font-size:0.7rem;"></i>{{ m.note }}
+              {% else %}
+                <span style="opacity:0.4;">—</span>
+              {% endif %}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <h6>No movements recorded yet</h6>
+    <p>Use the Stock IN / OUT buttons on the Inventory page to log movements.</p>
+    <a href="{{ url_for('product_list') }}" class="btn-grad">
+      <i class="bi bi-box-seam"></i> Go to Inventory
+    </a>
+  </div>
+  {% endif %}
+
+</div>
 
 {% endblock %}

@@ -1,95 +1,163 @@
 {% extends "base.html" %}
-{% block title %}
-  {{ "Edit Product" if action == "edit" else "Add Product" }} — Logistic Inventory
+{% block title %}{{ "Edit Product" if action == "edit" else "Add Product" }} — LogiStock{% endblock %}
+{% block page_title %}
+  <i class="bi bi-{{ 'pencil-square' if action == 'edit' else 'plus-circle' }} me-2"
+     style="background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+  {{ "Edit Product" if action == "edit" else "Add Product" }}
 {% endblock %}
 
 {% block content %}
-<h1>{{ "✏️ Edit Product" if action == "edit" else "➕ Add Product" }}</h1>
 
-<form method="POST">
+<div class="row justify-content-center">
+  <div class="col-xl-9">
 
-  <table cellpadding="6">
+    <div class="glass-card">
+      <div class="card-head">
+        <h6>
+          <i class="bi bi-{{ 'pencil-square' if action == 'edit' else 'box-seam' }}"></i>
+          {{ "Update product details" if action == "edit" else "New product information" }}
+        </h6>
+        <a href="{{ url_for('product_list') }}" class="btn-glass">
+          <i class="bi bi-arrow-left"></i> Back to Inventory
+        </a>
+      </div>
 
-    <tr>
-      <td><label for="name">Name <span style="color:red">*</span></label></td>
-      <td>
-        <input id="name" type="text" name="name"
-               value="{{ product.name or '' }}" required
-               style="width:280px;">
-      </td>
-    </tr>
+      <div class="card-body">
+        <form method="POST">
 
-    <tr>
-      <td><label for="sku">SKU <span style="color:red">*</span></label></td>
-      <td>
-        <input id="sku" type="text" name="sku"
-               value="{{ product.sku or '' }}" required
-               style="width:160px;"
-               {% if action == "edit" %}title="Changing SKU may affect existing movements"{% endif %}>
-      </td>
-    </tr>
+          {# ── Row 1: Name + SKU ──────────────────────────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-7">
+              <label class="form-label">
+                Product Name <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                <input type="text" name="name" class="form-control"
+                       value="{{ product.name or '' }}"
+                       placeholder="e.g. Forklift Battery Pack" required>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">
+                SKU <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                <input type="text" name="sku" class="form-control"
+                       value="{{ product.sku or '' }}"
+                       placeholder="e.g. EQUIP-001" required
+                       style="text-transform:uppercase;"
+                       {% if action == "edit" %}title="Changing SKU affects movement history"{% endif %}>
+              </div>
+            </div>
+          </div>
 
-    <tr>
-      <td><label for="category">Category <span style="color:red">*</span></label></td>
-      <td>
-        <input id="category" type="text" name="category"
-               value="{{ product.category or '' }}" required
-               style="width:200px;"
-               placeholder="e.g. Equipment, Packaging, Safety">
-      </td>
-    </tr>
+          {# ── Row 2: Category + Supplier ─────────────────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">
+                Category <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                <input type="text" name="category" class="form-control"
+                       value="{{ product.category or '' }}"
+                       placeholder="e.g. Equipment, Safety, Packaging" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Supplier</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-truck"></i></span>
+                <input type="text" name="supplier" class="form-control"
+                       value="{{ product.supplier or '' }}"
+                       placeholder="e.g. PowerCell Ltd.">
+              </div>
+            </div>
+          </div>
 
-    <tr>
-      <td><label for="quantity">Quantity <span style="color:red">*</span></label></td>
-      <td>
-        <input id="quantity" type="number" name="quantity" min="0"
-               value="{{ product.quantity if product.quantity is not none else 0 }}"
-               required style="width:100px;">
-      </td>
-    </tr>
+          {# ── Row 3: Quantity + Reorder Level + Price ─────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label">
+                Quantity <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-stack"></i></span>
+                <input type="number" name="quantity" class="form-control" min="0"
+                       value="{{ product.quantity if product.quantity is not none else 0 }}"
+                       required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                Reorder Level <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-bell"></i></span>
+                <input type="number" name="reorder_level" class="form-control" min="0"
+                       value="{{ product.reorder_level if product.reorder_level is not none else 0 }}"
+                       required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                Price (₹) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-currency-rupee"></i></span>
+                <input type="number" name="price" class="form-control"
+                       min="0" step="0.01"
+                       value="{{ product.price or '' }}"
+                       placeholder="0.00" required>
+              </div>
+            </div>
+          </div>
 
-    <tr>
-      <td><label for="reorder_level">Reorder Level <span style="color:red">*</span></label></td>
-      <td>
-        <input id="reorder_level" type="number" name="reorder_level" min="0"
-               value="{{ product.reorder_level if product.reorder_level is not none else 0 }}"
-               required style="width:100px;">
-      </td>
-    </tr>
+          {# ── Row 4: Location ─────────────────────────────────────────────── #}
+          <div class="row g-3 mb-4">
+            <div class="col-12">
+              <label class="form-label">Storage Location</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" name="location" class="form-control"
+                       value="{{ product.location or '' }}"
+                       placeholder="e.g. Warehouse A — Shelf 3">
+              </div>
+            </div>
+          </div>
 
-    <tr>
-      <td><label for="price">Price (USD) <span style="color:red">*</span></label></td>
-      <td>
-        <input id="price" type="number" name="price" min="0" step="0.01"
-               value="{{ product.price or '' }}" required
-               style="width:120px;">
-      </td>
-    </tr>
+          {# ── Buttons ─────────────────────────────────────────────────────── #}
+          <div class="d-flex gap-3 flex-wrap">
+            <button type="submit" class="btn-grad" style="padding:11px 28px;font-size:0.88rem;">
+              <i class="bi bi-{{ 'floppy' if action == 'edit' else 'plus-lg' }}"></i>
+              {{ "Update Product" if action == "edit" else "Add Product" }}
+            </button>
+            <a href="{{ url_for('product_list') }}" class="btn-glass" style="padding:11px 20px;">
+              <i class="bi bi-x-lg"></i> Cancel
+            </a>
+          </div>
 
-    <tr>
-      <td><label for="supplier">Supplier</label></td>
-      <td>
-        <input id="supplier" type="text" name="supplier"
-               value="{{ product.supplier or '' }}" style="width:240px;">
-      </td>
-    </tr>
+        </form>
+      </div>
+    </div>
 
-    <tr>
-      <td><label for="location">Location</label></td>
-      <td>
-        <input id="location" type="text" name="location"
-               value="{{ product.location or '' }}" style="width:240px;">
-      </td>
-    </tr>
+  </div>
+</div>
 
-  </table>
+{% endblock %}
 
-  <br>
-  <button type="submit">
-    {{ "💾 Update Product" if action == "edit" else "✅ Add Product" }}
-  </button>
-  &nbsp;
-  <a href="{{ url_for('product_list') }}">Cancel</a>
-
-</form>
+{% block scripts %}
+<script>
+  // Auto-uppercase the SKU field as the user types
+  const skuInput = document.querySelector('input[name="sku"]');
+  if (skuInput) {
+    skuInput.addEventListener('input', function() {
+      const pos = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(pos, pos);
+    });
+  }
+</script>
 {% endblock %}

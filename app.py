@@ -155,13 +155,27 @@ def dashboard():
     # Five most recent movements
     recent_movements = list(movements.find().sort("date", -1).limit(5))
 
+    # Total units across all products (for stat card)
+    units_result = list(products.aggregate([
+        {"$group": {"_id": None, "total": {"$sum": "$quantity"}}}
+    ]))
+    total_units = units_result[0]["total"] if units_result else 0
+
+    # Top 5 products by quantity — strip ObjectId so tojson works cleanly
+    top5_by_qty = [
+        {"name": p["name"], "quantity": p["quantity"]}
+        for p in products.find({}, {"name": 1, "quantity": 1}).sort("quantity", -1).limit(5)
+    ]
+
     return render_template(
         "dashboard.html",
         total_products=total_products,
         total_value=total_value,
+        total_units=total_units,
         low_stock=low_stock,
         stock_by_category=stock_by_category,
         recent_movements=recent_movements,
+        top5_by_qty=top5_by_qty,
     )
 
 
