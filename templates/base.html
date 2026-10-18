@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Logistic Inventory{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="{{ url_for('dashboard') }}">🏠 Dashboard</a> |
+    <a href="{{ url_for('product_list') }}">📦 Products</a> |
+    <a href="{{ url_for('add_product') }}">➕ Add Product</a> |
+    <a href="{{ url_for('movement_history') }}">📋 Movements</a>
+  </nav>
+</header>
+
+<main>
+  {# ── Flash messages ────────────────────────────────────────────────────── #}
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <p>Logistic Inventory &copy; 2025</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Logistic Inventory{% endblock %}
+
+{% block content %}
+<h1>📊 Dashboard</h1>
+
+{# ── Summary cards ──────────────────────────────────────────────────────── #}
+<h2>Summary</h2>
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Total Products</th>
+    <th>Total Inventory Value</th>
+    <th>Low-Stock Items</th>
+  </tr>
+  <tr>
+    <td>{{ total_products }}</td>
+    <td>${{ "%.2f" | format(total_value) }}</td>
+    <td>{{ low_stock | length }}</td>
+  </tr>
+</table>
+
+{# ── Stock by category ───────────────────────────────────────────────────── #}
+<h2>Stock by Category</h2>
+{% if stock_by_category %}
+<table border="1" cellpadding="6">
+  <tr><th>Category</th><th>Total Qty</th><th>Products</th></tr>
+  {% for cat in stock_by_category %}
+  <tr>
+    <td>{{ cat._id }}</td>
+    <td>{{ cat.total_qty }}</td>
+    <td>{{ cat.count }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No products yet.</p>
+{% endif %}
+
+{# ── Low-stock alerts ────────────────────────────────────────────────────── #}
+<h2>⚠️ Low-Stock Items (quantity ≤ reorder level)</h2>
+{% if low_stock %}
+<table border="1" cellpadding="6">
+  <tr><th>Name</th><th>SKU</th><th>Category</th><th>Qty</th><th>Reorder Level</th></tr>
+  {% for p in low_stock %}
+  <tr style="background:#ffe8e8;">
+    <td>{{ p.name }}</td>
+    <td>{{ p.sku }}</td>
+    <td>{{ p.category }}</td>
+    <td><strong>{{ p.quantity }}</strong></td>
+    <td>{{ p.reorder_level }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>✅ All items are above their reorder levels.</p>
+{% endif %}
+
+{# ── Recent movements ────────────────────────────────────────────────────── #}
+<h2>🔄 Recent Movements (last 5)</h2>
+{% if recent_movements %}
+<table border="1" cellpadding="6">
+  <tr><th>Product</th><th>Type</th><th>Qty</th><th>Date (UTC)</th><th>Note</th></tr>
+  {% for m in recent_movements %}
+  <tr>
+    <td>{{ m.product_name }}</td>
+    <td>{{ m.type }}</td>
+    <td>{{ m.qty }}</td>
+    <td>{{ m.date.strftime('%Y-%m-%d %H:%M') }}</td>
+    <td>{{ m.note or "—" }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p><a href="{{ url_for('movement_history') }}">View all movements →</a></p>
+{% else %}
+<p>No movements recorded yet.</p>
+{% endif %}
+
+{% endblock %}
