@@ -28,6 +28,7 @@
           <th>Type</th>
           <th>Qty</th>
           <th>Date &amp; Time</th>
+          <th>User</th>
           <th>Note</th>
         </tr>
       </thead>
@@ -60,6 +61,11 @@
             <br>
             <span style="font-size:0.72rem;color:var(--text-3);">
               {{ m.date.strftime('%H:%M UTC') }}
+            </span>
+          </td>
+          <td data-label="User">
+            <span style="font-size:0.8rem;color:var(--text-2);">
+              <i class="bi bi-person me-1" style="opacity:0.6;"></i>{{ m.user or 'system' }}
             </span>
           </td>
           <td data-label="Note">

@@ -1,30 +1,39 @@
 """
-app.py — Logistic Inventory Flask application (Step 2: full backend).
+app.py — Logistic Inventory Flask application with Authentication & Role Control.
 
 Routes
 ------
-GET  /                         Dashboard: stats, low-stock, recent movements
-GET  /products                 Product list with search (?q=) and category filter
-GET  /products/add             Show add form
-POST /products/add             Create a new product
-GET  /products/edit/<id>       Show edit form
-POST /products/edit/<id>       Update an existing product
-POST /products/delete/<id>     Delete a product
-POST /stock/<id>/<kind>        Stock IN or OUT; logs a movement
-GET  /movements                Full movement history, newest first
+GET  /login                     Show login page
+POST /login                     Authenticate user with Werkzeug hash
+GET  /logout                    Sign out current user
+GET  /register                  Show user registration form (admin only)
+POST /register                  Create new user account (admin only)
+GET  /                          Dashboard (login required)
+GET  /products                  Product list (login required)
+GET  /products/add              Add product form (admin only)
+POST /products/add              Insert product (admin only)
+GET  /products/edit/<id>        Edit product form (admin only)
+POST /products/edit/<id>        Update product (admin only)
+POST /products/delete/<id>      Delete product (admin only)
+POST /stock/<id>/<kind>         Stock IN or OUT; logs movement with user tag (login required)
+GET  /movements                 Movement history (login required)
 """
 
 import os
 from datetime import datetime, timezone
+from functools import wraps
 
 from bson import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
 from flask import (Flask, abort, flash, redirect, render_template,
                    request, url_for)
+from flask_login import (LoginManager, UserMixin, current_user,
+                         login_required, login_user, logout_user)
 from pymongo.errors import DuplicateKeyError
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import client, movements, products
+from db import client, movements, products, users
 
 # ── App setup ────────────────────────────────────────────────────────────────
 
@@ -32,6 +41,49 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback-dev-key")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Flask-Login setup
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Please sign in to access LogiStock."
+login_manager.login_message_category = "warning"
+
+
+# ── User model & loader ──────────────────────────────────────────────────────
+
+class User(UserMixin):
+    def __init__(self, doc: dict):
+        self.id = str(doc["_id"])
+        self.username = doc.get("username", "")
+        self.role = doc.get("role", "staff")
+        self.doc = doc
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == "admin"
+
+
+@login_manager.user_loader
+def load_user(user_id: str):
+    try:
+        doc = users.find_one({"_id": ObjectId(user_id)})
+        return User(doc) if doc else None
+    except Exception:
+        return None
+
+
+def admin_required(f):
+    """Decorator to restrict route access strictly to users with role='admin'."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != "admin":
+            flash("Access denied. Admin privileges required.", "error")
+            return redirect(url_for("dashboard"))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,30 +125,35 @@ def validate_product_form(form) -> tuple:
     if not category:
         errors.append("Category is required.")
 
-    # ── Numeric fields ──
+    # ── Numeric: quantity (int >= 0) ──
+    raw_qty = form.get("quantity", "").strip()
     try:
-        quantity = int(form.get("quantity", ""))
+        quantity = int(raw_qty)
         if quantity < 0:
             errors.append("Quantity cannot be negative.")
     except (ValueError, TypeError):
+        errors.append("Quantity must be a non-negative whole number.")
         quantity = None
-        errors.append("Quantity must be a whole number.")
 
+    # ── Numeric: reorder_level (int >= 0) ──
+    raw_reorder = form.get("reorder_level", "").strip()
     try:
-        reorder_level = int(form.get("reorder_level", ""))
+        reorder_level = int(raw_reorder)
         if reorder_level < 0:
             errors.append("Reorder level cannot be negative.")
     except (ValueError, TypeError):
+        errors.append("Reorder level must be a non-negative whole number.")
         reorder_level = None
-        errors.append("Reorder level must be a whole number.")
 
+    # ── Numeric: price (float >= 0.0) ──
+    raw_price = form.get("price", "").strip()
     try:
-        price = float(form.get("price", ""))
-        if price < 0:
+        price = float(raw_price)
+        if price < 0.0:
             errors.append("Price cannot be negative.")
     except (ValueError, TypeError):
+        errors.append("Price must be a valid non-negative number.")
         price = None
-        errors.append("Price must be a valid number.")
 
     if errors:
         return None, errors
@@ -113,9 +170,88 @@ def validate_product_form(form) -> tuple:
     }, []
 
 
-# ── Routes ───────────────────────────────────────────────────────────────────
+# ── Auth Routes ──────────────────────────────────────────────────────────────
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Handle user login."""
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if not username or not password:
+            flash("Please enter both username and password.", "error")
+            return render_template("login.html")
+
+        user_doc = users.find_one({"username": username})
+        if user_doc and check_password_hash(user_doc.get("password_hash", ""), password):
+            login_user(User(user_doc))
+            flash(f"Welcome back, {username}!", "success")
+            next_page = request.args.get("next")
+            if not next_page or not next_page.startswith("/") or next_page.startswith("//"):
+                next_page = url_for("dashboard")
+            return redirect(next_page)
+
+        flash("Invalid username or password.", "error")
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    """Handle user logout."""
+    logout_user()
+    flash("You have been signed out.", "success")
+    return redirect(url_for("login"))
+
+
+@app.route("/register", methods=["GET", "POST"])
+@login_required
+@admin_required
+def register():
+    """Admin-only route to create new user accounts."""
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        role     = request.form.get("role", "staff").strip().lower()
+
+        errors = []
+        if not username:
+            errors.append("Username is required.")
+        if not password:
+            errors.append("Password is required.")
+        if role not in ("admin", "staff"):
+            errors.append("Role must be 'admin' or 'staff'.")
+
+        if errors:
+            for err in errors:
+                flash(err, "error")
+            return render_template("register.html")
+
+        try:
+            users.insert_one({
+                "username": username,
+                "password_hash": generate_password_hash(password),
+                "role": role,
+                "created_at": datetime.now(timezone.utc),
+            })
+            flash(f"User '{username}' created successfully with role '{role.upper()}'.", "success")
+            return redirect(url_for("register"))
+        except DuplicateKeyError:
+            flash(f"Username '{username}' already exists. Please choose a different username.", "error")
+            return render_template("register.html")
+
+    return render_template("register.html")
+
+
+# ── Inventory & Operations Routes ────────────────────────────────────────────
 
 @app.route("/")
+@login_required
 def dashboard():
     """
     Dashboard summary:
@@ -180,6 +316,7 @@ def dashboard():
 
 
 @app.route("/products")
+@login_required
 def product_list():
     """
     Product listing with optional:
@@ -212,9 +349,11 @@ def product_list():
 
 
 @app.route("/products/add", methods=["GET", "POST"])
+@login_required
+@admin_required
 def add_product():
     """
-    GET  — Render empty add form.
+    GET  — Render empty add form (admin only).
     POST — Validate input, insert new product, flash result.
            On duplicate SKU shows a friendly DuplicateKeyError message.
     """
@@ -240,9 +379,11 @@ def add_product():
 
 
 @app.route("/products/edit/<product_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
 def edit_product(product_id):
     """
-    GET  — Render form pre-filled with existing product data.
+    GET  — Render form pre-filled with existing product data (admin only).
     POST — Validate, update with $set, flash result.
            Preserves created_at; skips updating it on edit.
     """
@@ -271,9 +412,11 @@ def edit_product(product_id):
 
 
 @app.route("/products/delete/<product_id>", methods=["POST"])
+@login_required
+@admin_required
 def delete_product(product_id):
     """
-    POST only — Delete a product by ID.
+    POST only — Delete a product by ID (admin only).
     GET requests to this URL will 405 (Method Not Allowed).
     """
     product = get_product_or_404(product_id)
@@ -283,13 +426,14 @@ def delete_product(product_id):
 
 
 @app.route("/stock/<product_id>/<kind>", methods=["POST"])
+@login_required
 def update_stock(product_id, kind):
     """
-    POST — Adjust stock quantity and record a movement document.
+    POST — Adjust stock quantity and record a movement document with the current user.
     kind : 'IN'  — increase quantity ($inc positive delta)
            'OUT' — decrease quantity ($inc negative delta)
                    Blocked when requested qty > current stock.
-    Movement fields: product_id, product_name, type, qty, date, note.
+    Movement fields: product_id, product_name, type, qty, date, note, user.
     """
     kind = kind.upper()
     if kind not in ("IN", "OUT"):
@@ -321,7 +465,8 @@ def update_stock(product_id, kind):
     delta = qty if kind == "IN" else -qty
     products.update_one({"_id": product["_id"]}, {"$inc": {"quantity": delta}})
 
-    # Log the movement
+    # Log the movement with current authenticated user
+    user_name = current_user.username if current_user.is_authenticated else "system"
     movements.insert_one({
         "product_id":   product["_id"],
         "product_name": product["name"],
@@ -329,6 +474,7 @@ def update_stock(product_id, kind):
         "qty":          qty,
         "date":         datetime.now(timezone.utc),
         "note":         note,
+        "user":         user_name,
     })
 
     flash(
@@ -339,6 +485,7 @@ def update_stock(product_id, kind):
 
 
 @app.route("/movements")
+@login_required
 def movement_history():
     """Full movement log, sorted newest-first."""
     all_movements = list(movements.find().sort("date", -1))

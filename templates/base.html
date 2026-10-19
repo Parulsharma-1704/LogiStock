@@ -41,10 +41,12 @@
 
     <div class="sb-section">Actions</div>
 
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <a href="{{ url_for('add_product') }}"
        class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}">
       <i class="bi bi-plus-circle"></i> Add Product
     </a>
+    {% endif %}
     <a href="{{ url_for('movement_history') }}"
        class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}">
       <i class="bi bi-arrow-left-right"></i> Movements
@@ -75,10 +77,12 @@
         <i class="bi bi-box-seam"></i> Inventory
       </a>
       <div class="sb-section">Actions</div>
+      {% if current_user.is_authenticated and current_user.role == 'admin' %}
       <a href="{{ url_for('add_product') }}"
          class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}">
         <i class="bi bi-plus-circle"></i> Add Product
       </a>
+      {% endif %}
       <a href="{{ url_for('movement_history') }}"
          class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}">
         <i class="bi bi-arrow-left-right"></i> Movements
@@ -98,7 +102,28 @@
       </button>
       <span class="topbar-title">{% block page_title %}LogiStock{% endblock %}</span>
     </div>
-    <span class="topbar-date" id="topbarDate"></span>
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <span class="topbar-date d-none d-lg-inline" id="topbarDate"></span>
+      {% if current_user.is_authenticated %}
+      <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center px-2 py-1 rounded" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+          <i class="bi bi-person-circle me-1" style="color:var(--accent-a);"></i>
+          <span style="font-weight:600; font-size:0.82rem; color:var(--text-1);">{{ current_user.username }}</span>
+          <span class="badge ms-2" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; background: {% if current_user.role == 'admin' %}linear-gradient(135deg, #8b5cf6, #ec4899){% else %}rgba(0,212,255,0.2){% endif %}; color:white;">
+            {{ current_user.role }}
+          </span>
+        </div>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('register') }}" class="btn-ghost btn-sm px-2 py-1" title="Register New User" style="font-size:0.8rem;">
+          <i class="bi bi-person-plus"></i> <span class="d-none d-sm-inline">User</span>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="btn-ghost btn-sm px-2 py-1 text-danger" title="Logout" style="font-size:0.8rem;">
+          <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
+        </a>
+      </div>
+      {% endif %}
+    </div>
   </header>
 
   {# ── TOAST CONTAINER ────────────────────────────────────────────────────── #}

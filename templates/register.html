@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Register User — LogiStock{% endblock %}
+{% block page_title %}
+  <i class="bi bi-person-plus me-2" style="background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+  User Management
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-md-8">
+    <div class="glass-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0 text-white"><i class="bi bi-shield-lock me-2 text-info"></i>Register New User</h5>
+          <span style="font-size:0.75rem; color:var(--text-3);">Admin privileged action</span>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn-ghost btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('register') }}">
+          <div class="mb-3">
+            <label class="form-label" for="username">Username <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input type="text"
+                     name="username"
+                     id="username"
+                     class="form-control"
+                     placeholder="e.g. rahul_sharma"
+                     required
+                     autofocus>
+            </div>
+            <div class="form-text" style="color:var(--text-3); font-size:0.75rem;">Must be unique across all system users.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-key"></i></span>
+              <input type="password"
+                     name="password"
+                     id="password"
+                     class="form-control"
+                     placeholder="Enter user password"
+                     required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="role">Assigned Role <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+              <select name="role" id="role" class="form-select" required>
+                <option value="staff" selected>Staff — View inventory & perform stock IN / OUT</option>
+                <option value="admin">Admin — Full control (manage products, users, reports)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary border-opacity-25">
+            <a href="{{ url_for('dashboard') }}" class="btn-ghost">Cancel</a>
+            <button type="submit" class="btn-grad px-4">
+              <i class="bi bi-check2-circle me-1"></i> Create User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

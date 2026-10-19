@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — LogiStock</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3 & Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <style>
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+    .login-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(0,212,255,0.2) 0%, rgba(139,92,246,0.15) 50%, transparent 70%);
+      filter: blur(50px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+      padding: 38px 32px;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .brand-mark {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-glow"></div>
+
+  {# ── Toast messages ──────────────────────────────────────────────────────── #}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1200;">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% for category, message in messages %}
+      <div class="toast align-items-center border-0 text-white
+                  {% if category == 'success' %}bg-success{% elif category == 'error' or category == 'danger' %}bg-danger{% else %}bg-warning text-dark{% endif %}"
+           role="alert" data-bs-autohide="true" data-bs-delay="4500">
+        <div class="d-flex">
+          <div class="toast-body fw-semibold" style="font-size:0.84rem;">
+            {% if category == 'success' %}<i class="bi bi-check-circle me-1"></i>
+            {% else %}<i class="bi bi-exclamation-circle me-1"></i>{% endif %}
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <div class="brand-mark">LogiStock</div>
+      <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-3); font-weight:600; margin-top:2px;">
+        Inventory Management
+      </div>
+      <p class="text-muted mt-2 mb-0" style="font-size:0.85rem;">Sign in to access your inventory portal</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="mb-3">
+        <label class="form-label" for="username">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text"
+                 name="username"
+                 id="username"
+                 class="form-control"
+                 placeholder="Enter username"
+                 required
+                 autofocus>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input type="password"
+                 name="password"
+                 id="password"
+                 class="form-control"
+                 placeholder="Enter password"
+                 required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-grad w-100 py-2" style="font-weight:600; font-size:0.92rem;">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+      </button>
+    </form>
+
+    <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25" style="font-size:0.75rem; color:var(--text-3);">
+      LogiStock Inventory Control System
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.toast').forEach(el => new bootstrap.Toast(el).show());
+</script>
+</body>
+</html>
