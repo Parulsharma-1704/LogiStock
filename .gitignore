@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 *.pycache
+.pytest_cache/
+.coverage
 
 # Virtual environment
 venv/

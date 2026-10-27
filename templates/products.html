@@ -150,9 +150,11 @@
     <i class="bi bi-inbox"></i>
     <h6>No products found</h6>
     <p>{% if q or selected_category %}Try different search terms or clear the filters.{% else %}Your inventory is empty. Add your first product!{% endif %}</p>
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <a href="{{ url_for('add_product') }}" class="btn-grad">
       <i class="bi bi-plus-lg"></i> Add Product
     </a>
+    {% endif %}
   </div>
   {% endif %}
 </div>
@@ -168,6 +170,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form id="stockInForm" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="modal-body">
           <p style="font-size:0.84rem;color:var(--text-2);margin-bottom:16px;">
             Adding stock for: <strong id="siProductName" style="color:var(--accent-a);"></strong>
@@ -199,6 +202,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form id="stockOutForm" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="modal-body">
           <p style="font-size:0.84rem;color:var(--text-2);margin-bottom:16px;">
             Removing stock from: <strong id="soProductName" style="color:var(--c-danger);"></strong>
@@ -232,6 +236,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form id="deleteForm" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="modal-body" style="text-align:center;padding:28px 22px;">
           <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:2.5rem;margin-bottom:14px;display:block;"></i>
           <p style="font-size:0.9rem;color:var(--text-2);">

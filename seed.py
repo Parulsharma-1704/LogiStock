@@ -169,6 +169,7 @@ def seed():
             "qty":          qty,
             "date":         datetime.now(timezone.utc),
             "note":         note,
+            "user":         "seed",  # Marks these as automatically seeded records
         }
         for sku, kind, qty, note in MOVEMENTS_SEED
     ]

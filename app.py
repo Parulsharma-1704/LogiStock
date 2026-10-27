@@ -28,6 +28,7 @@ from bson.errors import InvalidId
 from dotenv import load_dotenv
 from flask import (Flask, abort, flash, redirect, render_template,
                    request, url_for)
+from flask_wtf.csrf import CSRFProtect
 from flask_login import (LoginManager, UserMixin, current_user,
                          login_required, login_user, logout_user)
 from pymongo.errors import DuplicateKeyError
@@ -40,7 +41,22 @@ from db import client, movements, products, users
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "fallback-dev-key")
+
+_secret = os.getenv("SECRET_KEY")
+if not _secret:
+    # Refuse to run silently with a weak key — set SECRET_KEY in your .env
+    import warnings
+    warnings.warn(
+        "SECRET_KEY not set in environment; using an insecure fallback. "
+        "Set SECRET_KEY in your .env file before deploying.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+    _secret = "fallback-dev-key-DO-NOT-USE-IN-PRODUCTION"
+app.secret_key = _secret
+
+# Enable CSRF protection for all POST forms via Flask-WTF
+csrf = CSRFProtect(app)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
@@ -75,12 +91,13 @@ def load_user(user_id: str):
 
 
 def admin_required(f):
-    """Decorator to restrict route access strictly to users with role='admin'."""
+    """Decorator to restrict route access strictly to users with role='admin'.
+    Returns HTTP 403 Forbidden so tests can assert the status code.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != "admin":
-            flash("Access denied. Admin privileges required.", "error")
-            return redirect(url_for("dashboard"))
+            abort(403)  # Forbidden — staff users get a 403, not a silent redirect
         return f(*args, **kwargs)
     return decorated_function
 
@@ -497,6 +514,12 @@ def movement_history():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    """Return a plain-text 403 so API callers and tests see the status code."""
+    return "403 Forbidden — Admin access required.", 403
 
 
 # ── Entry point ──────────────────────────────────────────────────────────────
