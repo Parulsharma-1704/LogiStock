@@ -1,16 +1,66 @@
 /**
  * LogiStock — Core Web Application JavaScript
- * Features: Dark Emerald/Teal Theme helpers, Password toggles, button spinners,
- * Count-up animations, Tooltips, Skeleton shimmer removal, Login 3D Decorative Crate
+ * Features: Dark Emerald/Teal Theme helpers, Sidebar collapse & mobile drawer,
+ * Password toggles, button spinners, Count-up animations, Tooltips,
+ * Skeleton shimmer removal, Login 3D Decorative Crate
  */
 
 (function () {
   'use strict';
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isMobile = window.innerWidth < 768;
+  const isMobile = window.innerWidth < 992;
 
-  // ── 1. Password Visibility Toggle ─────────────────────────────
+  // ── 1. Sidebar Collapse & Mobile Drawer ───────────────────────
+  const sidebar = document.querySelector('.sidebar');
+  const mainWrap = document.querySelector('.main-wrap');
+  const collapseBtn = document.getElementById('sidebarCollapseBtn');
+  const mobileToggleBtn = document.getElementById('mobileDrawerOpenBtn') || document.querySelector('.topbar-toggle');
+  const backdrop = document.getElementById('mobileSidebarBackdrop');
+
+  // Desktop collapse state restoration
+  if (collapseBtn && sidebar && mainWrap && !isMobile) {
+    const isCollapsed = localStorage.getItem('logistock_sidebar_collapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      mainWrap.classList.add('collapsed');
+    }
+
+    collapseBtn.addEventListener('click', function () {
+      const willCollapse = !sidebar.classList.contains('collapsed');
+      sidebar.classList.toggle('collapsed', willCollapse);
+      mainWrap.classList.toggle('collapsed', willCollapse);
+      localStorage.setItem('logistock_sidebar_collapsed', willCollapse);
+    });
+  }
+
+  // Mobile Drawer toggle
+  if (mobileToggleBtn && sidebar) {
+    mobileToggleBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+      if (backdrop) backdrop.classList.toggle('show');
+    });
+
+    if (backdrop) {
+      backdrop.addEventListener('click', function () {
+        sidebar.classList.remove('mobile-open');
+        backdrop.classList.remove('show');
+      });
+    }
+
+    // Close mobile drawer when clicking any link inside sidebar
+    sidebar.querySelectorAll('.sb-link').forEach(link => {
+      link.addEventListener('click', function () {
+        if (window.innerWidth < 992) {
+          sidebar.classList.remove('mobile-open');
+          if (backdrop) backdrop.classList.remove('show');
+        }
+      });
+    });
+  }
+
+  // ── 2. Password Visibility Toggle ─────────────────────────────
   document.addEventListener('click', function (e) {
     const toggleBtn = e.target.closest('.password-toggle-btn');
     if (!toggleBtn) return;
@@ -36,7 +86,7 @@
     }
   });
 
-  // ── 2. Button Loading Spinner on Form Submit ──────────────────
+  // ── 3. Button Loading Spinner on Form Submit ──────────────────
   document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', function (e) {
       if (!form.checkValidity()) return;
@@ -56,18 +106,18 @@
     });
   });
 
-  // ── 3. VanillaTilt for Internal App Cards ─────────────────────
-  if (typeof VanillaTilt !== 'undefined' && !prefersReducedMotion && !isMobile) {
+  // ── 4. VanillaTilt for Internal App Cards ─────────────────────
+  if (typeof VanillaTilt !== 'undefined' && !prefersReducedMotion && window.innerWidth > 768) {
     VanillaTilt.init(document.querySelectorAll('.stat-card, [data-tilt]'), {
-      max: 8,
+      max: 6,
       speed: 350,
       glare: true,
-      'max-glare': 0.12,
+      'max-glare': 0.1,
       scale: 1.01,
     });
   }
 
-  // ── 4. Bootstrap Tooltip Initialization ───────────────────────
+  // ── 5. Bootstrap Tooltip Initialization ───────────────────────
   if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -75,7 +125,7 @@
     });
   }
 
-  // ── 5. Count-Up Animation for Dashboard Stat Cards ───────────
+  // ── 6. Count-Up Animation for Dashboard Stat Cards ───────────
   function countUp(el, target, prefix) {
     if (prefersReducedMotion) {
       el.textContent = (prefix || '') + Math.floor(target).toLocaleString('en-IN');
@@ -100,7 +150,7 @@
     countUp(el, target, prefix);
   });
 
-  // ── 6. Low-Stock Progress Bars Animation ──────────────────────
+  // ── 7. Low-Stock Progress Bars Animation ──────────────────────
   document.querySelectorAll('.ls-bar-fill[data-pct]').forEach(el => {
     const pct = el.dataset.pct;
     setTimeout(() => {
@@ -108,7 +158,7 @@
     }, 200);
   });
 
-  // ── 7. Chart Skeleton Shimmer Removal ─────────────────────────
+  // ── 8. Chart Skeleton Shimmer Removal ─────────────────────────
   window.hideChartSkeleton = function (chartId) {
     const skeleton = document.getElementById(chartId + '-skeleton');
     if (skeleton) {
@@ -116,7 +166,7 @@
     }
   };
 
-  // ── 8. Login Brand Panel Decorative 3D Emerald Object ─────────
+  // ── 9. Login Brand Panel Decorative 3D Emerald Object ─────────
   const loginCanvasContainer = document.getElementById('threejs-login-canvas');
   if (loginCanvasContainer) {
     function isWebGLAvailable() {

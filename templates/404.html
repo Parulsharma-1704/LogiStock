@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 {% block title %}404 — Holographic Route Missing · LogiStock{% endblock %}
-{% block page_title %}404 Missing Route{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-center" style="min-height: 65vh;">
+{# ── PAGE HEADER ─────────────────────────────────────────── #}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-header-title">404 Missing Route</h1>
+    <p class="page-header-sub">The warehouse corridor, product document, or system route you requested does not exist or has been relocated.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+    <a href="{{ url_for('dashboard') }}" class="btn-nft-glass py-2 px-3">
+      <i class="bi bi-speedometer2 me-1"></i> Dashboard
+    </a>
+  </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 55vh;">
   <div class="glass-card text-center p-5" style="max-width: 540px;" data-tilt>
     <div class="grad-text mb-3" style="font-family:var(--font-heading); font-size: clamp(4rem, 10vw, 6.5rem); font-weight:900; line-height:1;">
       404

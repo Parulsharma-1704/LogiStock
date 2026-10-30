@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Inventory Catalog — LogiStock{% endblock %}
-{% block page_title %}<i class="bi bi-box-seam me-2" style="background:var(--grad-signature);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>Inventory Catalog{% endblock %}
 
 {% block content %}
+
+{# ── PAGE HEADER ─────────────────────────────────────────── #}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-header-title">Inventory Catalog</h1>
+    <p class="page-header-sub">Search, monitor stock thresholds, and manage warehouse product listings.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <a href="{{ url_for('add_product') }}" class="btn-nft-primary py-2 px-3">
+      <i class="bi bi-plus-circle-fill me-1"></i> Add Product
+    </a>
+    {% endif %}
+  </div>
+</div>
 
 {# ── SEARCH / FILTER BAR ─────────────────────────────────── #}
 <div class="glass-card mb-4" data-tilt>
@@ -44,7 +58,7 @@
 
         <!-- Add Product (Admin Only) -->
         {% if current_user.is_authenticated and current_user.role == 'admin' %}
-        <a href="{{ url_for('add_product') }}" class="btn-nft-primary py-2 px-4 ms-auto">
+        <a href="{{ url_for('add_product') }}" class="btn-nft-primary py-2 px-4 ms-auto d-none d-md-inline-flex">
           <i class="bi bi-plus-circle-fill"></i> Add Product
         </a>
         {% endif %}

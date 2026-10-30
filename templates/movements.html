@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Movement History & Audit Log — LogiStock{% endblock %}
-{% block page_title %}<i class="bi bi-arrow-left-right me-2" style="background:var(--grad-signature);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>Movement Audit Log{% endblock %}
 
 {% block content %}
+
+{# ── PAGE HEADER ─────────────────────────────────────────── #}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-header-title">Movement Audit Log</h1>
+    <p class="page-header-sub">Complete historical ledger of every unit received or dispatched in warehouse records.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+    <span class="badge-in">▲ Stock IN</span>
+    <span class="badge-out">▼ Stock OUT</span>
+  </div>
+</div>
 
 <div class="glass-card">
   <div class="card-head">
@@ -12,10 +23,9 @@
         — {{ movements | length }} audit record{{ 's' if movements | length != 1 }}
       </span>
     </h6>
-    <div class="d-flex gap-2">
-      <span class="badge-in">▲ Stock IN</span>
-      <span class="badge-out">▼ Stock OUT</span>
-    </div>
+    <a href="{{ url_for('product_list') }}" class="btn-nft-glass py-1 px-3" style="font-size:0.75rem;">
+      <i class="bi bi-boxes me-1"></i> Inventory Catalog
+    </a>
   </div>
 
   {% if movements %}
@@ -63,7 +73,7 @@
           </td>
           <td data-label="User">
             <span class="badge py-1 px-2 rounded-pill" style="background:rgba(10,40,32,0.7); border:1px solid var(--glass-border); color:var(--text-2); font-size:0.78rem;">
-              <i class="bi bi-person me-1" style="color:var(--mint);"></i>{{ m.user or 'system' }}
+              <i class="bi bi-person me-1" style="color:var(--cyan);"></i>{{ m.user or 'system' }}
             </span>
           </td>
           <td data-label="Note">

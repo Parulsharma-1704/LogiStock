@@ -15,148 +15,150 @@
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Dark Emerald / Teal Dashboard Theme with Rich Palette -->
+  <!-- Dark Emerald / Teal Theme -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block head %}{% endblock %}
 </head>
 <body>
 
-{# ── DESKTOP SIDEBAR ──────────────────────────────────────── #}
-<nav class="sidebar">
-  <div class="sb-logo">
-    <a href="{{ url_for('index') }}" class="text-decoration-none">
-      <div class="d-flex align-items-center gap-2 mb-1">
-        <div class="nft-brand-icon" style="width:34px; height:34px; font-size:1.05rem; border-radius:10px;">
-          <i class="bi bi-box-seam-fill"></i>
-        </div>
-        <div class="sb-logo-name">Logi<span class="grad-text">Stock</span></div>
+<!-- Backdrop for Mobile Drawer -->
+<div class="sb-mobile-backdrop" id="mobileSidebarBackdrop"></div>
+
+{# ── COLLAPSIBLE SIDEBAR ───────────────────────────────────── #}
+<nav class="sidebar" id="appSidebar">
+  <!-- 1. Logo + Collapse Button -->
+  <div class="sb-header d-flex align-items-center justify-content-between">
+    <a href="{{ url_for('index') }}" class="d-flex align-items-center gap-2 text-decoration-none sb-logo-link">
+      <div class="nft-brand-icon sb-brand-icon">
+        <i class="bi bi-box-seam-fill"></i>
       </div>
-      <div class="sb-logo-sub">Inventory Control</div>
+      <div class="sb-brand-text">
+        <div class="sb-logo-name">Logi<span class="grad-text">Stock</span></div>
+        <div class="sb-logo-sub">Inventory Control</div>
+      </div>
     </a>
+    <button type="button" class="sb-collapse-btn d-none d-lg-flex" id="sidebarCollapseBtn" aria-label="Collapse sidebar" title="Collapse sidebar">
+      <i class="bi bi-chevron-left"></i>
+    </button>
   </div>
 
+  <!-- 2. Profile Card Just Under Logo -->
+  {% if current_user.is_authenticated %}
+  <div class="sb-profile-card">
+    <div class="sb-profile-avatar">
+      <i class="bi bi-person-fill"></i>
+      <span class="sb-status-dot"></span>
+    </div>
+    <div class="sb-profile-info">
+      <div class="sb-profile-name text-truncate">{{ current_user.username }}</div>
+      <div class="sb-profile-role-badge {% if current_user.role == 'admin' %}role-admin{% else %}role-staff{% endif %}">
+        {{ current_user.role | capitalize }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 3. Navigation Menu -->
   <div class="sb-nav">
     <div class="sb-section">Navigation</div>
 
-    <a href="{{ url_for('index') }}" class="sb-link">
-      <i class="bi bi-globe"></i> Public Portal
+    <a href="{{ url_for('index') }}" class="sb-link" title="Public Portal">
+      <i class="bi bi-globe"></i>
+      <span class="sb-label">Public Portal</span>
     </a>
 
     <a href="{{ url_for('dashboard') }}"
-       class="sb-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-      <i class="bi bi-speedometer2"></i> Dashboard
+       class="sb-link {% if request.endpoint == 'dashboard' %}active{% endif %}" title="Dashboard">
+      <i class="bi bi-speedometer2"></i>
+      <span class="sb-label">Dashboard</span>
     </a>
+
     <a href="{{ url_for('product_list') }}"
-       class="sb-link {% if request.endpoint == 'product_list' %}active{% endif %}">
-      <i class="bi bi-boxes"></i> Inventory
+       class="sb-link {% if request.endpoint == 'product_list' %}active{% endif %}" title="Inventory">
+      <i class="bi bi-boxes"></i>
+      <span class="sb-label">Inventory</span>
+      <i class="bi bi-chevron-right sb-chevron"></i>
     </a>
 
     <div class="sb-section">Operations</div>
 
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <a href="{{ url_for('add_product') }}"
-       class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}">
-      <i class="bi bi-plus-circle"></i> Add Product
+       class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}" title="Add Product">
+      <i class="bi bi-plus-circle"></i>
+      <span class="sb-label">Add Product</span>
     </a>
     {% endif %}
 
     <a href="{{ url_for('movement_history') }}"
-       class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}">
-      <i class="bi bi-arrow-left-right"></i> Movements
+       class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}" title="Movements">
+      <i class="bi bi-arrow-left-right"></i>
+      <span class="sb-label">Movements</span>
+      <i class="bi bi-chevron-right sb-chevron"></i>
     </a>
   </div>
 
   <div class="sb-footer">LogiStock v2.0 &copy; 2026</div>
 </nav>
 
-{# ── MOBILE OFFCANVAS SIDEBAR ─────────────────────────────── #}
-<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="mobileSidebar" style="background: rgba(7, 33, 27, 0.96) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(52, 211, 153, 0.2);">
-  <div class="offcanvas-header border-bottom border-white border-opacity-10 p-3">
-    <div class="d-flex align-items-center gap-2">
-      <div class="nft-brand-icon" style="width:34px; height:34px; font-size:1.05rem; border-radius:10px;">
-        <i class="bi bi-box-seam-fill"></i>
-      </div>
-      <div>
-        <div class="sb-logo-name fs-6">Logi<span class="grad-text">Stock</span></div>
-        <div class="sb-logo-sub">Inventory Control</div>
-      </div>
-    </div>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body p-0">
-    <div class="sb-nav">
-      <div class="sb-section">Navigation</div>
-      <a href="{{ url_for('index') }}" class="sb-link">
-        <i class="bi bi-globe"></i> Public Portal
-      </a>
-      <a href="{{ url_for('dashboard') }}"
-         class="sb-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-        <i class="bi bi-speedometer2"></i> Dashboard
-      </a>
-      <a href="{{ url_for('product_list') }}"
-         class="sb-link {% if request.endpoint == 'product_list' %}active{% endif %}">
-        <i class="bi bi-boxes"></i> Inventory
-      </a>
-      <div class="sb-section">Operations</div>
-      {% if current_user.is_authenticated and current_user.role == 'admin' %}
-      <a href="{{ url_for('add_product') }}"
-         class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}">
-        <i class="bi bi-plus-circle"></i> Add Product
-      </a>
-      {% endif %}
-      <a href="{{ url_for('movement_history') }}"
-         class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}">
-        <i class="bi bi-arrow-left-right"></i> Movements
-      </a>
-    </div>
-  </div>
-</div>
-
 {# ── MAIN WRAPPER ─────────────────────────────────────────── #}
 <div class="main-wrap">
 
   {# ── TOPBAR ─────────────────────────────────────────────── #}
   <header class="topbar">
-    <div class="d-flex align-items-center gap-3">
-      <button class="topbar-toggle" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
+    <!-- Left: Mobile Toggle & Search Field -->
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button class="topbar-toggle d-lg-none" id="mobileDrawerOpenBtn" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>
       </button>
-      <span class="topbar-title">{% block page_title %}LogiStock{% endblock %}</span>
+
+      <form action="{{ url_for('product_list') }}" method="GET" class="d-none d-sm-block m-0">
+        <div class="topbar-search-wrap">
+          <i class="bi bi-search topbar-search-icon"></i>
+          <input type="text"
+                 name="q"
+                 class="topbar-search-input"
+                 placeholder="Search inventory, SKU, batch..."
+                 aria-label="Search inventory">
+        </div>
+      </form>
     </div>
 
+    <!-- Right: Round Icon Buttons & User Chip -->
     <div class="d-flex align-items-center gap-2 gap-md-3">
       <!-- Date Chip -->
-      <span class="d-none d-lg-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:rgba(10,40,32,0.6); border:1px solid var(--glass-border); font-size:0.82rem; color:var(--text-3);" id="topbarDateWrap">
+      <span class="d-none d-xl-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:rgba(10,40,32,0.6); border:1px solid var(--glass-border); font-size:0.82rem; color:var(--text-3);" id="topbarDateWrap">
         <i class="bi bi-calendar3" style="color:var(--cyan);"></i>
         <span id="topbarDate"></span>
       </span>
 
-      <!-- Notification Bell Chip with Amber Alert Indicator -->
-      <div class="position-relative d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle" style="width:36px; height:36px; background:rgba(10,40,32,0.6); border:1px solid var(--glass-border); color:var(--cyan); cursor:pointer;" title="System Alerts">
+      <!-- Low-stock Alert Bell with Indicator -->
+      <a href="{{ url_for('product_list') }}" class="topbar-icon-btn" title="Low-Stock Alerts">
         <i class="bi bi-bell"></i>
-        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-warning border border-dark rounded-circle" style="box-shadow: 0 0 6px rgba(245,158,11,0.8);"></span>
-      </div>
+        <span class="topbar-badge-dot"></span>
+      </a>
 
       {% if current_user.is_authenticated %}
-      <div class="d-flex align-items-center gap-2">
-        <div class="d-flex align-items-center px-3 py-1 rounded-pill" style="background:rgba(10,40,32,0.7); border:1px solid var(--glass-border);">
-          <i class="bi bi-person-circle me-2" style="color:var(--cyan);"></i>
-          <span style="font-weight:600; font-size:0.85rem; color:#fff;">{{ current_user.username }}</span>
-          <span class="badge ms-2" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; background: {% if current_user.role == 'admin' %}linear-gradient(135deg, #f59e0b, #fbbf24){% else %}linear-gradient(135deg, #06b6d4, #10b981){% endif %}; color:#04110e; font-weight:800; border-radius:9999px;">
-            {{ current_user.role }}
-          </span>
+      <!-- User Chip -->
+      <div class="topbar-user-chip">
+        <div class="topbar-user-avatar">
+          <i class="bi bi-person-fill"></i>
         </div>
-
-        {% if current_user.role == 'admin' %}
-        <a href="{{ url_for('register') }}" class="btn-nft-glass py-1 px-3" title="Register New User" style="font-size:0.8rem;">
-          <i class="bi bi-person-plus" style="color:var(--cyan);"></i> <span class="d-none d-sm-inline">User</span>
-        </a>
-        {% endif %}
-
-        <a href="{{ url_for('logout') }}" class="btn-nft-glass py-1 px-3" title="Logout" style="font-size:0.8rem; color:var(--coral) !important; border-color:rgba(251,113,133,0.35);">
-          <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
-        </a>
+        <div class="d-none d-md-block text-start">
+          <div class="topbar-user-name">{{ current_user.username }}</div>
+          <div class="topbar-user-role">{{ current_user.role | capitalize }}</div>
+        </div>
       </div>
+
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('register') }}" class="topbar-icon-btn" title="Register New User">
+        <i class="bi bi-person-plus"></i>
+      </a>
+      {% endif %}
+
+      <a href="{{ url_for('logout') }}" class="topbar-icon-btn" title="Logout" style="color:var(--coral) !important; border-color:rgba(251,113,133,0.35);">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
       {% endif %}
     </div>
   </header>

@@ -1,20 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Register User — LogiStock Administration{% endblock %}
-{% block page_title %}
-  <i class="bi bi-person-plus me-2" style="background:var(--grad-signature);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
-  User Administration
-{% endblock %}
 
 {% block content %}
+
+{# ── PAGE HEADER ─────────────────────────────────────────── #}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-header-title">User Administration</h1>
+    <p class="page-header-sub">Create and configure staff and administrator access credentials.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+    <a href="{{ url_for('dashboard') }}" class="btn-nft-glass py-2 px-3">
+      <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+  </div>
+</div>
+
 <div class="row justify-content-center">
   <div class="col-lg-6 col-md-8">
     <div class="glass-card" data-tilt>
       <div class="card-head">
         <div>
           <h5 class="mb-0 text-white"><i class="bi bi-shield-lock me-2" style="color:var(--mint);"></i>Create User Account</h5>
-          <span class="small" style="color:var(--text-muted);">Admin Privileged Governance</span>
+          <span class="small text-muted">Admin Privileged Governance</span>
         </div>
-        <a href="{{ url_for('dashboard') }}" class="btn-nft-glass py-1 px-3" style="font-size:0.8rem;">
+        <a href="{{ url_for('dashboard') }}" class="btn-nft-glass py-1 px-3 d-none d-sm-inline-flex" style="font-size:0.8rem;">
           <i class="bi bi-arrow-left me-1"></i> Dashboard
         </a>
       </div>
@@ -36,7 +46,7 @@
                      autofocus>
               <i class="bi bi-person input-icon"></i>
             </div>
-            <div class="small mt-1" style="font-size:0.75rem; color:var(--text-muted);">Must be unique across all system credentials.</div>
+            <div class="small mt-1 text-muted" style="font-size:0.75rem;">Must be unique across all system credentials.</div>
           </div>
 
           <!-- Password -->
