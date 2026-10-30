@@ -134,15 +134,19 @@ class TestAuth:
         assert r.status_code == 200
         assert b"Invalid" in r.data
 
+    def test_landing_page_public(self, client):
+        r = client.get("/")
+        assert r.status_code == 200
+
     def test_logged_out_redirect(self, client):
-        r = client.get("/", follow_redirects=False)
+        r = client.get("/dashboard", follow_redirects=False)
         assert r.status_code == 302
         assert "/login" in r.headers["Location"]
 
     def test_logout(self, client, admin_user):
         do_login(client, admin_user["username"], admin_user["password"])
         client.get("/logout", follow_redirects=True)
-        r = client.get("/", follow_redirects=False)
+        r = client.get("/dashboard", follow_redirects=False)
         assert r.status_code == 302
         assert "/login" in r.headers["Location"]
 

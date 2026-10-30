@@ -2,7 +2,7 @@
 {% block title %}{{ "Edit Product" if action == "edit" else "Add Product" }} — LogiStock{% endblock %}
 {% block page_title %}
   <i class="bi bi-{{ 'pencil-square' if action == 'edit' else 'plus-circle' }} me-2"
-     style="background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+     style="background:var(--grad-signature);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
   {{ "Edit Product" if action == "edit" else "Add Product" }}
 {% endblock %}
 
@@ -11,132 +11,158 @@
 <div class="row justify-content-center">
   <div class="col-xl-9">
 
-    <div class="glass-card">
+    <div class="glass-card" data-tilt>
       <div class="card-head">
         <h6>
-          <i class="bi bi-{{ 'pencil-square' if action == 'edit' else 'box-seam' }}"></i>
-          {{ "Update product details" if action == "edit" else "New product information" }}
+          <i class="bi bi-{{ 'pencil-square' if action == 'edit' else 'box-seam' }} me-2" style="color:var(--mint);"></i>
+          {{ "Update Product Parameters" if action == "edit" else "Catalogue New Inventory Item" }}
         </h6>
-        <a href="{{ url_for('product_list') }}" class="btn-glass">
+        <a href="{{ url_for('product_list') }}" class="btn-nft-glass py-1 px-3" style="font-size:0.8rem;">
           <i class="bi bi-arrow-left"></i> Back to Inventory
         </a>
       </div>
 
-      <div class="card-body">
+      <div class="card-body p-4 p-md-5">
         <form method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-          {# ── Row 1: Name + SKU ──────────────────────────────────────────── #}
-          <div class="row g-3 mb-3">
+          {# ── Row 1: Name + SKU ────────────────────────────────────────── #}
+          <div class="row g-4 mb-4">
             <div class="col-md-7">
-              <label class="form-label">
+              <label class="form-label small text-muted">
                 Product Name <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                <input type="text" name="name" class="form-control"
+              <div class="position-relative">
+                <input type="text"
+                       name="name"
+                       class="nft-input"
                        value="{{ product.name or '' }}"
-                       placeholder="e.g. Forklift Battery Pack" required>
+                       placeholder="e.g. Precision Optical Sensor"
+                       required>
+                <i class="bi bi-tag input-icon"></i>
               </div>
             </div>
+
             <div class="col-md-5">
-              <label class="form-label">
-                SKU <span class="text-danger">*</span>
+              <label class="form-label small text-muted">
+                Unique SKU <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                <input type="text" name="sku" class="form-control"
+              <div class="position-relative">
+                <input type="text"
+                       name="sku"
+                       class="nft-input"
                        value="{{ product.sku or '' }}"
-                       placeholder="e.g. EQUIP-001" required
-                       style="text-transform:uppercase;"
-                       {% if action == "edit" %}title="Changing SKU affects movement history"{% endif %}>
+                       placeholder="e.g. SENS-OPT-01"
+                       required
+                       style="text-transform:uppercase;">
+                <i class="bi bi-upc-scan input-icon"></i>
               </div>
             </div>
           </div>
 
-          {# ── Row 2: Category + Supplier ─────────────────────────────────── #}
-          <div class="row g-3 mb-3">
+          {# ── Row 2: Category + Supplier ───────────────────────────────── #}
+          <div class="row g-4 mb-4">
             <div class="col-md-6">
-              <label class="form-label">
+              <label class="form-label small text-muted">
                 Category <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-grid"></i></span>
-                <input type="text" name="category" class="form-control"
+              <div class="position-relative">
+                <input type="text"
+                       name="category"
+                       class="nft-input"
                        value="{{ product.category or '' }}"
-                       placeholder="e.g. Equipment, Safety, Packaging" required>
+                       placeholder="e.g. Electronics, Machinery, Safety"
+                       required>
+                <i class="bi bi-grid input-icon"></i>
               </div>
             </div>
+
             <div class="col-md-6">
-              <label class="form-label">Supplier</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-truck"></i></span>
-                <input type="text" name="supplier" class="form-control"
+              <label class="form-label small text-muted">Supplier / Vendor</label>
+              <div class="position-relative">
+                <input type="text"
+                       name="supplier"
+                       class="nft-input"
                        value="{{ product.supplier or '' }}"
-                       placeholder="e.g. PowerCell Ltd.">
+                       placeholder="e.g. Industrial Sensor Co.">
+                <i class="bi bi-truck input-icon"></i>
               </div>
             </div>
           </div>
 
-          {# ── Row 3: Quantity + Reorder Level + Price ─────────────────────── #}
-          <div class="row g-3 mb-3">
+          {# ── Row 3: Quantity + Reorder Level + Price ───────────────────── #}
+          <div class="row g-4 mb-4">
             <div class="col-md-4">
-              <label class="form-label">
-                Quantity <span class="text-danger">*</span>
+              <label class="form-label small text-muted">
+                Initial Quantity <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-stack"></i></span>
-                <input type="number" name="quantity" class="form-control" min="0"
+              <div class="position-relative">
+                <input type="number"
+                       name="quantity"
+                       class="nft-input"
+                       min="0"
                        value="{{ product.quantity if product.quantity is not none else 0 }}"
                        required>
+                <i class="bi bi-stack input-icon"></i>
               </div>
             </div>
+
             <div class="col-md-4">
-              <label class="form-label">
-                Reorder Level <span class="text-danger">*</span>
+              <label class="form-label small text-muted">
+                Reorder Threshold <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-bell"></i></span>
-                <input type="number" name="reorder_level" class="form-control" min="0"
+              <div class="position-relative">
+                <input type="number"
+                       name="reorder_level"
+                       class="nft-input"
+                       min="0"
                        value="{{ product.reorder_level if product.reorder_level is not none else 0 }}"
                        required>
+                <i class="bi bi-bell input-icon"></i>
               </div>
             </div>
+
             <div class="col-md-4">
-              <label class="form-label">
-                Price (₹) <span class="text-danger">*</span>
+              <label class="form-label small text-muted">
+                Unit Price (₹) <span class="text-danger">*</span>
               </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-currency-rupee"></i></span>
-                <input type="number" name="price" class="form-control"
-                       min="0" step="0.01"
+              <div class="position-relative">
+                <input type="number"
+                       name="price"
+                       class="nft-input"
+                       min="0"
+                       step="0.01"
                        value="{{ product.price or '' }}"
-                       placeholder="0.00" required>
+                       placeholder="0.00"
+                       required>
+                <i class="bi bi-currency-rupee input-icon"></i>
               </div>
             </div>
           </div>
 
-          {# ── Row 4: Location ─────────────────────────────────────────────── #}
-          <div class="row g-3 mb-4">
+          {# ── Row 4: Location ───────────────────────────────────────────── #}
+          <div class="row g-4 mb-5">
             <div class="col-12">
-              <label class="form-label">Storage Location</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                <input type="text" name="location" class="form-control"
+              <label class="form-label small text-muted">Warehouse Storage Location</label>
+              <div class="position-relative">
+                <input type="text"
+                       name="location"
+                       class="nft-input"
                        value="{{ product.location or '' }}"
-                       placeholder="e.g. Warehouse A — Shelf 3">
+                       placeholder="e.g. Warehouse Bay 4 — Shelf 12">
+                <i class="bi bi-geo-alt input-icon"></i>
               </div>
             </div>
           </div>
 
-          {# ── Buttons ─────────────────────────────────────────────────────── #}
-          <div class="d-flex gap-3 flex-wrap">
-            <button type="submit" class="btn-grad" style="padding:11px 28px;font-size:0.88rem;">
-              <i class="bi bi-{{ 'floppy' if action == 'edit' else 'plus-lg' }}"></i>
-              {{ "Update Product" if action == "edit" else "Add Product" }}
+          {# ── Buttons ───────────────────────────────────────────────────── #}
+          <div class="d-flex gap-3 flex-wrap align-items-center">
+            <button type="submit" class="btn-nft-primary py-2 px-5">
+              <i class="bi bi-{{ 'check2-circle' if action == 'edit' else 'plus-circle' }}"></i>
+              {{ "Save Changes" if action == "edit" else "Add to Inventory" }}
             </button>
-            <a href="{{ url_for('product_list') }}" class="btn-glass" style="padding:11px 20px;">
-              <i class="bi bi-x-lg"></i> Cancel
+            <a href="{{ url_for('product_list') }}" class="btn-nft-glass py-2 px-4">
+              <i class="bi bi-x"></i> Cancel
             </a>
           </div>
 

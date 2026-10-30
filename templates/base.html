@@ -3,32 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}LogiStock{% endblock %}</title>
+  <title>{% block title %}LogiStock — Inventory Command{% endblock %}</title>
 
-  <!-- Google Font: Poppins -->
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Bootstrap 5.3 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Custom theme -->
+  <!-- Dark Emerald / Teal Dashboard Theme with Rich Palette -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body>
 
-{# ── DESKTOP SIDEBAR ──────────────────────────────────────────────────────── #}
+{# ── DESKTOP SIDEBAR ──────────────────────────────────────── #}
 <nav class="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-name">LogiStock</div>
-    <div class="sb-logo-sub">Inventory Control</div>
+    <a href="{{ url_for('index') }}" class="text-decoration-none">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <div class="nft-brand-icon" style="width:34px; height:34px; font-size:1.05rem; border-radius:10px;">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <div class="sb-logo-name">Logi<span class="grad-text">Stock</span></div>
+      </div>
+      <div class="sb-logo-sub">Inventory Control</div>
+    </a>
   </div>
 
   <div class="sb-nav">
-    <div class="sb-section">Main</div>
+    <div class="sb-section">Navigation</div>
+
+    <a href="{{ url_for('index') }}" class="sb-link">
+      <i class="bi bi-globe"></i> Public Portal
+    </a>
 
     <a href="{{ url_for('dashboard') }}"
        class="sb-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
@@ -36,10 +48,10 @@
     </a>
     <a href="{{ url_for('product_list') }}"
        class="sb-link {% if request.endpoint == 'product_list' %}active{% endif %}">
-      <i class="bi bi-box-seam"></i> Inventory
+      <i class="bi bi-boxes"></i> Inventory
     </a>
 
-    <div class="sb-section">Actions</div>
+    <div class="sb-section">Operations</div>
 
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <a href="{{ url_for('add_product') }}"
@@ -47,36 +59,45 @@
       <i class="bi bi-plus-circle"></i> Add Product
     </a>
     {% endif %}
+
     <a href="{{ url_for('movement_history') }}"
        class="sb-link {% if request.endpoint == 'movement_history' %}active{% endif %}">
       <i class="bi bi-arrow-left-right"></i> Movements
     </a>
   </div>
 
-  <div class="sb-footer">LogiStock v2.0 &copy; 2025</div>
+  <div class="sb-footer">LogiStock v2.0 &copy; 2026</div>
 </nav>
 
-{# ── MOBILE OFFCANVAS SIDEBAR ─────────────────────────────────────────────── #}
-<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar">
-  <div class="offcanvas-header" style="border-bottom:1px solid var(--sidebar-border); padding:20px 22px;">
-    <div>
-      <div class="sb-logo-name">LogiStock</div>
-      <div class="sb-logo-sub">Inventory Control</div>
+{# ── MOBILE OFFCANVAS SIDEBAR ─────────────────────────────── #}
+<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="mobileSidebar" style="background: rgba(7, 33, 27, 0.96) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(52, 211, 153, 0.2);">
+  <div class="offcanvas-header border-bottom border-white border-opacity-10 p-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="nft-brand-icon" style="width:34px; height:34px; font-size:1.05rem; border-radius:10px;">
+        <i class="bi bi-box-seam-fill"></i>
+      </div>
+      <div>
+        <div class="sb-logo-name fs-6">Logi<span class="grad-text">Stock</span></div>
+        <div class="sb-logo-sub">Inventory Control</div>
+      </div>
     </div>
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
   </div>
   <div class="offcanvas-body p-0">
     <div class="sb-nav">
-      <div class="sb-section">Main</div>
+      <div class="sb-section">Navigation</div>
+      <a href="{{ url_for('index') }}" class="sb-link">
+        <i class="bi bi-globe"></i> Public Portal
+      </a>
       <a href="{{ url_for('dashboard') }}"
          class="sb-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
         <i class="bi bi-speedometer2"></i> Dashboard
       </a>
       <a href="{{ url_for('product_list') }}"
          class="sb-link {% if request.endpoint == 'product_list' %}active{% endif %}">
-        <i class="bi bi-box-seam"></i> Inventory
+        <i class="bi bi-boxes"></i> Inventory
       </a>
-      <div class="sb-section">Actions</div>
+      <div class="sb-section">Operations</div>
       {% if current_user.is_authenticated and current_user.role == 'admin' %}
       <a href="{{ url_for('add_product') }}"
          class="sb-link {% if request.endpoint == 'add_product' %}active{% endif %}">
@@ -91,34 +112,48 @@
   </div>
 </div>
 
-{# ── MAIN WRAPPER ─────────────────────────────────────────────────────────── #}
+{# ── MAIN WRAPPER ─────────────────────────────────────────── #}
 <div class="main-wrap">
 
-  {# ── TOPBAR ─────────────────────────────────────────────────────────────── #}
+  {# ── TOPBAR ─────────────────────────────────────────────── #}
   <header class="topbar">
-    <div class="topbar-left">
-      <button class="topbar-toggle" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="topbar-toggle" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>
       </button>
       <span class="topbar-title">{% block page_title %}LogiStock{% endblock %}</span>
     </div>
+
     <div class="d-flex align-items-center gap-2 gap-md-3">
-      <span class="topbar-date d-none d-lg-inline" id="topbarDate"></span>
+      <!-- Date Chip -->
+      <span class="d-none d-lg-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:rgba(10,40,32,0.6); border:1px solid var(--glass-border); font-size:0.82rem; color:var(--text-3);" id="topbarDateWrap">
+        <i class="bi bi-calendar3" style="color:var(--cyan);"></i>
+        <span id="topbarDate"></span>
+      </span>
+
+      <!-- Notification Bell Chip with Amber Alert Indicator -->
+      <div class="position-relative d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle" style="width:36px; height:36px; background:rgba(10,40,32,0.6); border:1px solid var(--glass-border); color:var(--cyan); cursor:pointer;" title="System Alerts">
+        <i class="bi bi-bell"></i>
+        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-warning border border-dark rounded-circle" style="box-shadow: 0 0 6px rgba(245,158,11,0.8);"></span>
+      </div>
+
       {% if current_user.is_authenticated %}
       <div class="d-flex align-items-center gap-2">
-        <div class="d-flex align-items-center px-2 py-1 rounded" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
-          <i class="bi bi-person-circle me-1" style="color:var(--accent-a);"></i>
-          <span style="font-weight:600; font-size:0.82rem; color:var(--text-1);">{{ current_user.username }}</span>
-          <span class="badge ms-2" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; background: {% if current_user.role == 'admin' %}linear-gradient(135deg, #8b5cf6, #ec4899){% else %}rgba(0,212,255,0.2){% endif %}; color:white;">
+        <div class="d-flex align-items-center px-3 py-1 rounded-pill" style="background:rgba(10,40,32,0.7); border:1px solid var(--glass-border);">
+          <i class="bi bi-person-circle me-2" style="color:var(--cyan);"></i>
+          <span style="font-weight:600; font-size:0.85rem; color:#fff;">{{ current_user.username }}</span>
+          <span class="badge ms-2" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; background: {% if current_user.role == 'admin' %}linear-gradient(135deg, #f59e0b, #fbbf24){% else %}linear-gradient(135deg, #06b6d4, #10b981){% endif %}; color:#04110e; font-weight:800; border-radius:9999px;">
             {{ current_user.role }}
           </span>
         </div>
+
         {% if current_user.role == 'admin' %}
-        <a href="{{ url_for('register') }}" class="btn-ghost btn-sm px-2 py-1" title="Register New User" style="font-size:0.8rem;">
-          <i class="bi bi-person-plus"></i> <span class="d-none d-sm-inline">User</span>
+        <a href="{{ url_for('register') }}" class="btn-nft-glass py-1 px-3" title="Register New User" style="font-size:0.8rem;">
+          <i class="bi bi-person-plus" style="color:var(--cyan);"></i> <span class="d-none d-sm-inline">User</span>
         </a>
         {% endif %}
-        <a href="{{ url_for('logout') }}" class="btn-ghost btn-sm px-2 py-1 text-danger" title="Logout" style="font-size:0.8rem;">
+
+        <a href="{{ url_for('logout') }}" class="btn-nft-glass py-1 px-3" title="Logout" style="font-size:0.8rem; color:var(--coral) !important; border-color:rgba(251,113,133,0.35);">
           <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
         </a>
       </div>
@@ -126,13 +161,13 @@
     </div>
   </header>
 
-  {# ── TOAST CONTAINER ────────────────────────────────────────────────────── #}
+  {# ── TOAST CONTAINER ────────────────────────────────────── #}
   <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1200; margin-top:65px;">
     {% with messages = get_flashed_messages(with_categories=True) %}
       {% for category, message in messages %}
       <div class="toast align-items-center border-0 text-white
                   {% if category == 'success' %}bg-success{% elif category == 'error' %}bg-danger{% else %}bg-warning text-dark{% endif %}"
-           role="alert" data-bs-autohide="true" data-bs-delay="4500">
+           role="alert" data-bs-autohide="true" data-bs-delay="4500" style="border-radius:14px; backdrop-filter:blur(15px);">
         <div class="d-flex">
           <div class="toast-body fw-semibold" style="font-size:0.84rem;">
             {% if category == 'success' %}<i class="bi bi-check-circle me-1"></i>
@@ -148,15 +183,19 @@
     {% endwith %}
   </div>
 
-  {# ── PAGE CONTENT ───────────────────────────────────────────────────────── #}
+  {# ── PAGE CONTENT ───────────────────────────────────────── #}
   <main class="page-content">
     {% block content %}{% endblock %}
   </main>
 
-</div><!-- /main-wrap -->
+</div>
 
-<!-- Bootstrap JS -->
+<!-- Bootstrap 5.3 Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Vanilla-Tilt -->
+<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+<!-- App JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 <script>
   // Auto-init all toasts
@@ -165,11 +204,12 @@
   // Live date in topbar
   (function() {
     const el = document.getElementById('topbarDate');
-    const opts = { weekday:'short', year:'numeric', month:'short', day:'numeric' };
-    el.textContent = new Date().toLocaleDateString('en-IN', opts);
+    if (el) {
+      const opts = { weekday:'short', year:'numeric', month:'short', day:'numeric' };
+      el.textContent = new Date().toLocaleDateString('en-IN', opts);
+    }
   })();
 </script>
-
 {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LogiStock — Next-Gen Logistics & Inventory Hub{% endblock %}</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Dark Emerald / Teal Dashboard Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Sticky Glass Navbar -->
+  <header class="nft-navbar">
+    <div class="container nft-nav-container">
+      <a href="{{ url_for('index') }}" class="nft-brand">
+        <div class="nft-brand-icon">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <span class="nft-brand-text">Logi<span class="grad-text">Stock</span></span>
+      </a>
+
+      <!-- Desktop Links -->
+      <ul class="nft-nav-links d-none d-lg-flex">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#top-stock">Top Stock</a></li>
+        <li><a href="#suppliers">Suppliers</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+      </ul>
+
+      <!-- Action Pill & Auth Button -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="nav-search-pill d-none d-xl-flex">
+          <i class="bi bi-search" style="color:var(--mint);"></i>
+          <span>Track SKU / Items...</span>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="btn-nft-primary">
+          <i class="bi bi-speedometer2"></i>
+          <span>Go to Dashboard</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn-nft-primary">
+          <i class="bi bi-arrow-right-circle"></i>
+          <span>Login</span>
+        </a>
+        {% endif %}
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#publicNavOffcanvas" aria-controls="publicNavOffcanvas" style="border-radius:12px; border-color:var(--glass-border); background:rgba(10,40,32,0.6);" aria-label="Toggle navigation">
+          <i class="bi bi-list fs-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Offcanvas Menu -->
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="publicNavOffcanvas" style="background: rgba(7, 33, 27, 0.96) !important; backdrop-filter: blur(20px); border-left: 1px solid rgba(52, 211, 153, 0.2);">
+    <div class="offcanvas-header border-bottom border-secondary border-opacity-25">
+      <div class="nft-brand">
+        <div class="nft-brand-icon" style="width:36px; height:36px; font-size:1.1rem; border-radius:10px;">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <span class="nft-brand-text fs-5">Logi<span class="grad-text">Stock</span></span>
+      </div>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column justify-content-between p-4">
+      <ul class="list-unstyled d-flex flex-column gap-3 fs-6">
+        <li><a href="#hero" class="text-decoration-none text-light py-2 d-block" data-bs-dismiss="offcanvas">Home</a></li>
+        <li><a href="#top-stock" class="text-decoration-none text-light py-2 d-block" data-bs-dismiss="offcanvas">Top Stock</a></li>
+        <li><a href="#suppliers" class="text-decoration-none text-light py-2 d-block" data-bs-dismiss="offcanvas">Suppliers</a></li>
+        <li><a href="#features" class="text-decoration-none text-light py-2 d-block" data-bs-dismiss="offcanvas">Features</a></li>
+        <li><a href="#how-it-works" class="text-decoration-none text-light py-2 d-block" data-bs-dismiss="offcanvas">How It Works</a></li>
+      </ul>
+
+      <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="btn-nft-primary w-100 justify-content-center">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn-nft-primary w-100 justify-content-center">
+          <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="nft-footer">
+    <div class="container">
+      <div class="row g-4 align-items-center mb-4">
+        <div class="col-md-5">
+          <div class="footer-logo mb-2">
+            Logi<span class="grad-text">Stock</span>
+          </div>
+          <p class="text-muted small mb-0" style="max-width: 320px; color: var(--text-muted) !important;">
+            Next-generation logistics inventory command system powered by Flask, PyMongo, and real-time MongoDB auditing.
+          </p>
+        </div>
+        <div class="col-md-7 text-md-end footer-links">
+          <a href="#hero">Home</a>
+          <a href="#features">Features</a>
+          <a href="#top-stock">Inventory</a>
+          <a href="#suppliers">Suppliers</a>
+          <a href="{{ url_for('login') }}">Access Portal</a>
+        </div>
+      </div>
+      <div class="border-top border-secondary border-opacity-25 pt-4 text-center small" style="color: var(--text-muted);">
+        LogiStock Inventory Control &copy; 2026. Designed with NFT-Marketplace Aesthetics for Industrial Logistics.
+      </div>
+    </div>
+  </footer>
+
+  <!-- CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+
+  <!-- Landing Interaction Script -->
+  <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

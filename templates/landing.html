@@ -1,0 +1,352 @@
+{% extends "base_public.html" %}
+
+{% block title %}LogiStock — Track, Manage & Move Your Inventory Smarter{% endblock %}
+
+{% block content %}
+<!-- ── HERO SECTION ────────────────────────────────────────── -->
+<section id="hero" class="landing-hero">
+  <!-- Ambient Gradient Glow Orbs -->
+  <div class="hero-glow-orb hero-glow-1"></div>
+  <div class="hero-glow-orb hero-glow-2"></div>
+
+  <div class="container hero-content">
+    <div class="row align-items-center g-5">
+      <!-- Left Hero Column -->
+      <div class="col-lg-6">
+        <div class="hero-badge">
+          <i class="bi bi-shield-check"></i> Next-Gen Logistics OS v2.0
+        </div>
+
+        <h1 class="hero-title">
+          Track, Manage & <span class="grad-text">Move Your Inventory</span> Smarter.
+        </h1>
+
+        <p class="hero-subtitle">
+          Engineered with high-precision stock auditing, role-enforced security, and real-time MongoDB tracking for modern warehouse logistics.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-buttons">
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="btn-nft-primary">
+            <i class="bi bi-speedometer2"></i> Launch Dashboard
+          </a>
+          {% else %}
+          <a href="{{ url_for('login') }}" class="btn-nft-primary">
+            <i class="bi bi-lightning-charge-fill"></i> Get Started
+          </a>
+          {% endif %}
+          <a href="#features" class="btn-nft-glass">
+            <i class="bi bi-play-circle-fill" style="color:var(--mint);"></i> Explore System
+          </a>
+        </div>
+
+        <!-- Glass Hero Stats Box -->
+        <div class="hero-stats-box">
+          <div class="h-stat-item">
+            <div class="h-stat-number" data-target="{{ total_products if total_products > 0 else 10 }}" data-suffix="+">
+              {{ total_products if total_products > 0 else '10+' }}
+            </div>
+            <div class="h-stat-label">Products Active</div>
+          </div>
+
+          <div class="h-stat-item">
+            <div class="h-stat-number" data-target="{{ total_movements if total_movements > 0 else 50 }}" data-suffix="+">
+              {{ total_movements if total_movements > 0 else '50+' }}
+            </div>
+            <div class="h-stat-label">Stock Audits</div>
+          </div>
+
+          <div class="h-stat-item">
+            <div class="h-stat-number" data-target="99.9" data-suffix="%">
+              99.9%
+            </div>
+            <div class="h-stat-label">Audit Accuracy</div>
+          </div>
+
+          <div class="h-stat-item">
+            <div class="h-stat-number">
+              24/7
+            </div>
+            <div class="h-stat-label">Live Alerts</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right 3D Object Canvas & Overlays -->
+      <div class="col-lg-6">
+        <div class="hero-3d-wrap" id="threejs-hero-wrap">
+          <div id="threejs-hero-canvas"></div>
+
+          <!-- Floating Glass Card Overlay 1 (Top Right) -->
+          <div class="floating-3d-card f-card-1">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="p-1 rounded-circle bg-success shadow-sm" style="width:8px; height:8px;"></span>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--mint); font-family:var(--font-heading);">
+                Live Sync: 100% Online
+              </span>
+            </div>
+            <div style="font-size:0.82rem; color:#fff; font-weight:600;">
+              Total Units: <span class="grad-text-cyan">{{ total_units }}</span>
+            </div>
+          </div>
+
+          <!-- Floating Glass Card Overlay 2 (Bottom Left) -->
+          <div class="floating-3d-card f-card-2">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--amber); font-family:var(--font-heading);">
+                Automated Reorder
+              </span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-3);">
+              Low-stock alerts dispatched in real-time
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MARQUEE LOGISTICS STRIP ─────────────────────────────── -->
+<div class="marquee-wrap">
+  <div class="marquee-content">
+    <span class="marquee-item"><span class="marquee-star">✦</span> Warehousing</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Freight Forwarding</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Supply Chain Integrity</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Smart Fulfilment</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Cold Storage</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Last-Mile Distribution</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Automated Reorder</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Real-Time Audit Logs</span>
+    <!-- Duplicate for infinite marquee loop -->
+    <span class="marquee-item"><span class="marquee-star">✦</span> Warehousing</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Freight Forwarding</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Supply Chain Integrity</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Smart Fulfilment</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Cold Storage</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Last-Mile Distribution</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Automated Reorder</span>
+    <span class="marquee-item"><span class="marquee-star">✦</span> Real-Time Audit Logs</span>
+  </div>
+</div>
+
+<!-- ── TOP STOCKED PRODUCTS (3D GLASS CARDS) ────────────────── -->
+<section id="top-stock" class="py-5 my-4">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">High-Volume Inventory</span>
+      <h2 class="section-title">Top Stocked <span class="grad-text">Products</span></h2>
+      <p class="section-desc">
+        Real-time view of highest inventory holdings queried directly from your MongoDB warehouse records.
+      </p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      {% for product in top_products %}
+      <div class="col-md-6 col-lg-4 {% if loop.index == 1 %}col-xl-4{% endif %}">
+        <div class="product-nft-card" data-tilt>
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="p-card-badge">{{ product.category or 'Logistics' }}</span>
+              <span class="p-card-sku">{{ product.sku }}</span>
+            </div>
+            <h4 class="p-card-name">{{ product.name }}</h4>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
+              <i class="bi bi-geo-alt me-1" style="color:var(--aqua);"></i> {{ product.location or 'Main Warehouse' }}
+            </div>
+          </div>
+
+          <div>
+            <div class="p-card-meta">
+              <div>
+                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Stock Level</div>
+                <div class="p-card-qty">{{ product.quantity }} <span style="font-size:0.75rem; color:var(--text-muted);">units</span></div>
+              </div>
+              <div class="text-end">
+                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Unit Price</div>
+                <div class="p-card-price">₹{{ "%.2f"|format(product.price) }}</div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('product_list') }}" class="btn-nft-glass w-100 justify-content-center py-2" style="font-size:0.8rem;">
+                <i class="bi bi-arrow-left-right"></i> Manage Stock
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── TOP SUPPLIERS SECTION ───────────────────────────────── -->
+<section id="suppliers" class="py-5" style="background: rgba(7, 33, 27, 0.45); border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">Trusted Partners</span>
+      <h2 class="section-title">Verified <span class="grad-text">Suppliers</span></h2>
+      <p class="section-desc">
+        Integrated logistics providers and material suppliers powering our fulfillment pipeline.
+      </p>
+    </div>
+
+    <div class="row g-3 justify-content-center">
+      {% for sup in suppliers %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="supplier-pill-card" data-tilt>
+          <div class="supplier-avatar">
+            {{ sup.name[:2]|upper }}
+          </div>
+          <div class="supplier-info text-truncate">
+            <h6 class="text-truncate">{{ sup.name }}</h6>
+            <span>Verified Vendor</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── SYSTEM FEATURES (6 TILT CARDS) ───────────────────────── -->
+<section id="features" class="py-5 my-5">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">Core Capabilities</span>
+      <h2 class="section-title">Engineered for <span class="grad-text">High Performance</span></h2>
+      <p class="section-desc">
+        Every tool required for complete transparency and operational governance in warehouse environments.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-1"><i class="bi bi-boxes"></i></div>
+          <h5>Real-Time Stock Auditing</h5>
+          <p>Instant Stock IN and OUT adjustments with atomic MongoDB updates, preventing race conditions and lost counts.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-2"><i class="bi bi-bell"></i></div>
+          <h5>Low-Stock Reorder Triggers</h5>
+          <p>Automated threshold monitoring flagging items when physical quantities drop below configured safety levels.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-3"><i class="bi bi-clock-history"></i></div>
+          <h5>Immutable Movement Log</h5>
+          <p>Complete historical ledger of every unit received or dispatched, tagged with user IDs, timestamps, and notes.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-4"><i class="bi bi-shield-lock"></i></div>
+          <h5>Role-Based Access Control</h5>
+          <p>Multi-tier authorization separating Admin management from Staff operational roles with HTTP 403 route protection.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-5"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+          <h5>Auditing & Reports Export</h5>
+          <p>Fast data exports and structured queries enabling warehouse managers to generate audits on demand.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box" data-tilt>
+          <div class="feature-icon-wrap fi-6"><i class="bi bi-graph-up-arrow"></i></div>
+          <h5>Asset & Valuation Analytics</h5>
+          <p>Interactive Chart.js visualizations showing category distribution and inventory valuation in real-time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS (CONNECTING TIMELINE) ───────────────────── -->
+<section id="how-it-works" class="py-5 my-4">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">Operation Lifecycle</span>
+      <h2 class="section-title">How <span class="grad-text">LogiStock</span> Works</h2>
+      <p class="section-desc">
+        A streamlined 4-step workflow from vendor consignment arrival to final client dispatch.
+      </p>
+    </div>
+
+    <div class="row g-4 position-relative">
+      <div class="col-md-6 col-lg-3 timeline-step">
+        <div class="step-number-circle">01</div>
+        <div class="step-card" data-tilt>
+          <h5 class="mb-2">Catalog Intake</h5>
+          <p class="small mb-0" style="color:var(--text-body);">Admins register unique SKUs, categories, locations, and safety reorder levels.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3 timeline-step">
+        <div class="step-number-circle">02</div>
+        <div class="step-card" data-tilt>
+          <h5 class="mb-2">Receive Stock IN</h5>
+          <p class="small mb-0" style="color:var(--text-body);">Staff log incoming shipments at the loading bay with invoice notes and batch counts.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3 timeline-step">
+        <div class="step-number-circle">03</div>
+        <div class="step-card" data-tilt>
+          <h5 class="mb-2">Dispatch OUT</h5>
+          <p class="small mb-0" style="color:var(--text-body);">Orders are deducted from stock with automatic overdraft prevention checks.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3 timeline-step">
+        <div class="step-number-circle">04</div>
+        <div class="step-card" data-tilt>
+          <h5 class="mb-2">Live Insights</h5>
+          <p class="small mb-0" style="color:var(--text-body);">Dashboard aggregates inventory valuation and triggers alerts for depleted stock.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CALL TO ACTION BANNER ─────────────────────────── -->
+<div class="container">
+  <div class="cta-banner">
+    <h2 class="display-6 fw-bold text-white mb-3" style="font-family:var(--font-heading);">
+      Ready to Revolutionize Your <span class="grad-text">Supply Chain?</span>
+    </h2>
+    <p class="lead text-light opacity-75 mb-4 mx-auto" style="max-width: 620px; font-size:1rem; color:var(--text-2);">
+      Experience zero lost inventory, automated safety reorders, and airtight role governance today.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}" class="btn-nft-primary px-4 py-3">
+        <i class="bi bi-speedometer2"></i> Open Inventory Dashboard
+      </a>
+      {% else %}
+      <a href="{{ url_for('login') }}" class="btn-nft-primary px-4 py-3">
+        <i class="bi bi-shield-lock-fill"></i> Access Portal Now
+      </a>
+      {% endif %}
+      <a href="#hero" class="btn-nft-glass px-4 py-3">
+        <i class="bi bi-arrow-up"></i> Back to Top
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

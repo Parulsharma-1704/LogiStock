@@ -34,7 +34,7 @@ from flask_login import (LoginManager, UserMixin, current_user,
 from pymongo.errors import DuplicateKeyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import client, movements, products, users
+from db import client, movements, products, users, suppliers, warehouses
 
 # ── App setup ────────────────────────────────────────────────────────────────
 
@@ -265,9 +265,49 @@ def register():
     return render_template("register.html")
 
 
-# ── Inventory & Operations Routes ────────────────────────────────────────────
+# ── Landing & Operations Routes ──────────────────────────────────────────────
 
 @app.route("/")
+def index():
+    """
+    Public NFT-marketplace-style landing page.
+    Queries top products by quantity and top suppliers from MongoDB.
+    Logged-in users still see the landing page with 'Go to Dashboard'.
+    """
+    top_products = list(
+        products.find({}, {
+            "name": 1, "sku": 1, "quantity": 1, "price": 1,
+            "category": 1, "location": 1, "reorder_level": 1
+        })
+        .sort("quantity", -1)
+        .limit(5)
+    )
+
+    # Fetch suppliers from collection or fallback to distinct suppliers from products
+    supplier_docs = list(suppliers.find({}, {"name": 1, "contact": 1, "location": 1}).limit(8))
+    if not supplier_docs:
+        distinct_suppliers = [s for s in products.distinct("supplier") if s]
+        supplier_docs = [{"name": s} for s in distinct_suppliers[:8]]
+
+    total_products_count = products.count_documents({})
+    total_movements_count = movements.count_documents({})
+
+    units_result = list(products.aggregate([
+        {"$group": {"_id": None, "total": {"$sum": "$quantity"}}}
+    ]))
+    total_units = units_result[0]["total"] if units_result else 0
+
+    return render_template(
+        "landing.html",
+        top_products=top_products,
+        suppliers=supplier_docs,
+        total_products=total_products_count,
+        total_movements=total_movements_count,
+        total_units=total_units,
+    )
+
+
+@app.route("/dashboard")
 @login_required
 def dashboard():
     """
